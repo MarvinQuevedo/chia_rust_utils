@@ -44,8 +44,7 @@ pub fn get_puzzle_from_pk_and_hidden_puzzle(pk: PublicKey, hidden_puzzle: Progra
 
     let p2_args = [synthetic_pub_key.program].to_vec();
     let curried = p2_delegated_puzzle_or_hidden_puzzle_program()
-        .curry(p2_args)
-        .unwrap();
+        .curry(p2_args) ;
     return curried;
 }
 

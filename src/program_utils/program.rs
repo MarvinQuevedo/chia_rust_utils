@@ -1,7 +1,6 @@
-use crate::api::{bytes_to_hex, cmds_program_brun};
+use crate::api::cmds_program_brun;
 use crate::blockchain::sized_bytes::*;
-use crate::program_utils::curry_utils;
-use crate::program_utils::curry_utils::curry;
+
 use crate::program_utils::serialized_program::SerializedProgram;
 
 use crate::program_utils::serialize::node_from_bytes as deserialize2;
@@ -12,7 +11,7 @@ use clvm_tools_rs::classic::clvm_tools::binutils::disassemble;
 use clvm_tools_rs::classic::clvm_tools::sha256tree::sha256tree;
 
 use clvmr::allocator::SExp::{Atom, Pair};
-use clvmr::allocator::{Allocator, NodePtr, SExp};
+use clvmr::allocator::{Allocator, SExp};
 use clvmr::cost::Cost;
 use clvmr::node::Node;
 use hex::encode;
@@ -141,9 +140,39 @@ pub struct UncurriedProgram {
     pub args: Vec<Program>,
 }
 impl Program {
-    pub fn curry(&self, args: Vec<Program>) -> Result<Program, Box<dyn Error>> {
-        let (_cost, program) = curry(&self, args)?;
-        Ok(program)
+    pub fn curry(&self, args: Vec<Program>) -> Program {
+        /*  let (_cost, program) = curry_utils::curry(&self, args).unwrap();
+        program */
+
+        /*
+           def curry(self, *args) -> "Program":
+               fixed_args: Any = 1
+               for arg in reversed(args):
+                   fixed_args = [4, (1, arg), fixed_args]
+               return Program.to([2, (1, self), fixed_args])
+        */
+
+        let invert_list = args.iter().rev().collect::<Vec<&Program>>();
+        let mut fixed_args = Program::from(1);
+        for argument in invert_list {
+            fixed_args = Program::from(
+                [
+                    Program::from(4),
+                    Program::try_from((Program::from(1), argument.clone())).unwrap(),
+                    fixed_args.clone(),
+                ]
+                .to_vec(),
+            );
+        }
+
+        Program::from(
+            [
+                Program::from(2),
+                Program::try_from((Program::from(1), self.clone())).unwrap(),
+                Program::from(fixed_args),
+            ]
+            .to_vec(),
+        )
     }
 
     pub fn uncurry(&self) -> UncurriedProgram {
@@ -415,12 +444,77 @@ impl From<Vec<Program>> for Program {
             let program = element.clone();
             actual = program.cons(&actual);
         }
+      
         actual.clone()
     }
 }
 
 impl From<&Vec<u8>> for Program {
     fn from(bytes: &Vec<u8>) -> Self {
+        let mut alloc = Allocator::new();
+        let atom = match alloc.new_atom(bytes.as_slice()) {
+            Ok(ptr) => ptr,
+            Err(_) => alloc.null(),
+        };
+        let node = Node::new(&alloc, atom);
+        let node_bytes = match node_to_bytes(&node) {
+            Ok(n_bytes) => n_bytes,
+            Err(_) => Vec::new(),
+        };
+        let prog = Program {
+            serialized: node_bytes,
+            alloc: alloc,
+            nodeptr: atom,
+        };
+        prog
+    }
+}
+impl From<&u32> for Program {
+    fn from(number: &u32) -> Self {
+        let bytes = number.to_be_bytes().to_vec();
+        let mut alloc = Allocator::new();
+        let atom = match alloc.new_atom(bytes.as_slice()) {
+            Ok(ptr) => ptr,
+            Err(_) => alloc.null(),
+        };
+        let node = Node::new(&alloc, atom);
+        let node_bytes = match node_to_bytes(&node) {
+            Ok(n_bytes) => n_bytes,
+            Err(_) => Vec::new(),
+        };
+        let prog = Program {
+            serialized: node_bytes,
+            alloc: alloc,
+            nodeptr: atom,
+        };
+        prog
+    }
+}
+
+impl From<&u64> for Program {
+    fn from(number: &u64) -> Self {
+        let bytes = number.to_be_bytes().to_vec();
+        let mut alloc = Allocator::new();
+        let atom = match alloc.new_atom(bytes.as_slice()) {
+            Ok(ptr) => ptr,
+            Err(_) => alloc.null(),
+        };
+        let node = Node::new(&alloc, atom);
+        let node_bytes = match node_to_bytes(&node) {
+            Ok(n_bytes) => n_bytes,
+            Err(_) => Vec::new(),
+        };
+        let prog = Program {
+            serialized: node_bytes,
+            alloc: alloc,
+            nodeptr: atom,
+        };
+        prog
+    }
+}
+impl From<&BigInt> for Program {
+    fn from(number: &BigInt) -> Self {
+        let bytes = number.to_signed_bytes_be();
         let mut alloc = Allocator::new();
         let atom = match alloc.new_atom(bytes.as_slice()) {
             Ok(ptr) => ptr,

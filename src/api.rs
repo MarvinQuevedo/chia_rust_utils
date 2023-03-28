@@ -17,6 +17,7 @@ use clvmr::allocator::Allocator;
 use sha2::{Digest, Sha256};
 use yaml_rust::YamlEmitter;
 
+use crate::chia_wallet::cat::puzzles::create_cat_outer_puzzle::create_cat_puzzle;
 use crate::chia_wallet::standart::puzzles::p2_delegated_puzzle_or_hidden_puzzle::get_puzzle_from_pk;
 use crate::program_utils::call_tool::call_tool_with_return;
 use crate::program_utils::cldb::cldb_with_return;
@@ -383,5 +384,10 @@ pub fn get_puzzle_from_public_key(pk: Vec<u8>) -> Vec<u8> {
     pk_array.copy_from_slice(&pk);
     let public_key = PublicKey::from_bytes(&pk_array.clone()).unwrap();
     let program = get_puzzle_from_pk(public_key);
+    program.serialized.clone()
+}
+
+pub fn cats_create_cat_puzzle(tail_hash: Vec<u8>, inner_puzzle_hash: Vec<u8>) -> Vec<u8> {
+    let program = create_cat_puzzle(tail_hash.clone(), inner_puzzle_hash.clone());
     program.serialized.clone()
 }

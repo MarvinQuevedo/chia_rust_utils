@@ -378,7 +378,7 @@ pub fn program_run(program_bytes: Vec<u8>, args_str: Vec<String>) -> ApiOutputPr
         cost: run_result.cost,
     }
 }
-pub fn program_from_bytes(program_bytes: Vec<u8>) -> Vec<u8> {
+pub fn program_from_atom_bytes(program_bytes: Vec<u8>) -> Vec<u8> {
     let program = Program::from(&program_bytes);
     program.serialized.clone()
 }

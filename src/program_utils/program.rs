@@ -1,4 +1,4 @@
-use crate::api::cmds_program_brun;
+use crate::api::{bytes_to_hex, cmds_program_brun};
 use crate::blockchain::sized_bytes::*;
 
 use crate::program_utils::serialized_program::SerializedProgram;
@@ -8,6 +8,7 @@ use crate::program_utils::serialize::{node_from_bytes, node_to_bytes};
 use clvm_tools_rs::classic::clvm::__type_compatibility__::{t, Bytes, BytesFromType, Stream};
 use clvm_tools_rs::classic::clvm::serialize::{sexp_from_stream, SimpleCreateCLVMObject};
 use clvm_tools_rs::classic::clvm_tools::binutils::disassemble;
+
 use clvm_tools_rs::classic::clvm_tools::sha256tree::sha256tree;
 
 use clvmr::allocator::SExp::{Atom, Pair};
@@ -155,10 +156,12 @@ impl Program {
         let invert_list = args.iter().rev().collect::<Vec<&Program>>();
         let mut fixed_args = Program::from(1);
         for argument in invert_list {
+            let arg_program = Program::new(argument.serialized.clone());
+
             fixed_args = Program::from(
                 [
                     Program::from(4),
-                    Program::try_from((Program::from(1), argument.clone())).unwrap(),
+                    Program::try_from((Program::from(1), arg_program)).unwrap(),
                     fixed_args.clone(),
                 ]
                 .to_vec(),
@@ -370,6 +373,7 @@ impl Program {
             error: None,
         }
     }
+
     pub fn run(&self, args: Program) -> RunOutput {
         let mut alloc = Allocator::new();
         let serialized_p = SerializedProgram::from_bytes(&self.serialized.clone());
@@ -444,12 +448,13 @@ impl From<Vec<Program>> for Program {
             let program = element.clone();
             actual = program.cons(&actual);
         }
-      
+
         actual.clone()
     }
 }
 
 impl From<&Vec<u8>> for Program {
+    /// Atom program from bytes
     fn from(bytes: &Vec<u8>) -> Self {
         let mut alloc = Allocator::new();
         let atom = match alloc.new_atom(bytes.as_slice()) {
@@ -470,6 +475,7 @@ impl From<&Vec<u8>> for Program {
     }
 }
 impl From<&u32> for Program {
+    /// Atom program from integer
     fn from(number: &u32) -> Self {
         let bytes = number.to_be_bytes().to_vec();
         let mut alloc = Allocator::new();
@@ -492,6 +498,7 @@ impl From<&u32> for Program {
 }
 
 impl From<&u64> for Program {
+    /// Atom program from long unsigned integer
     fn from(number: &u64) -> Self {
         let bytes = number.to_be_bytes().to_vec();
         let mut alloc = Allocator::new();
@@ -513,6 +520,7 @@ impl From<&u64> for Program {
     }
 }
 impl From<&BigInt> for Program {
+    /// Atom program from big integer
     fn from(number: &BigInt) -> Self {
         let bytes = number.to_signed_bytes_be();
         let mut alloc = Allocator::new();
@@ -536,6 +544,7 @@ impl From<&BigInt> for Program {
 
 impl TryFrom<(Program, Program)> for Program {
     type Error = Box<(dyn StdError + 'static)>;
+
     fn try_from((first, second): (Program, Program)) -> Result<Self, Self::Error> {
         let mut alloc = Allocator::new();
         let first = node_from_bytes(&mut alloc, &first.serialized.as_slice())?;

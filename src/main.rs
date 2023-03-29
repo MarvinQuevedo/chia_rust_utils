@@ -54,4 +54,6 @@ fn main() {
 
     // println!("cat_puzzlehash1: {}", bytes_to_hex(cat_puzzle.serialized.clone()));
     println!("cat_puzzlehash1: {}", bytes_to_hex(cat_puzzlehash.clone()));
+    println!("tail_hash as atom: {}", bytes_to_hex(Program::from(cat_puzzlehash.clone()).serialized.clone()));
+    println!("tail_hash from serialized: {}", bytes_to_hex(Program::new(cat_puzzlehash.clone()).serialized.clone()));
 }

@@ -1,5 +1,5 @@
 use crate::{
-    api::bytes_to_hex,
+    api::{bytes_to_hex, hex_to_bytes},
     program_utils::{program::Program, serialized_program::SerializedProgram},
 };
 
@@ -11,25 +11,18 @@ use super::{
 // bytes tailhash,  bytes innerpuzhash
 pub fn create_cat_puzzle(tail_hash: Vec<u8>, inner_puzzle_hash: Vec<u8>) -> Program {
     let cat_program = CAT_MOD.clone();
-    let cat_hash_program = CAT_MOD_HASH_PROGRAM.clone();
+    let cat_hash_program = CAT_MOD_HASH_PROGRAM.clone() ;
     let limitations_program_hash = Program::from(&tail_hash.clone());
     let inner_puzzle_hash_program = Program::from(&inner_puzzle_hash.clone());
-
+  
     let args = [
-        cat_hash_program.clone(),
+        cat_hash_program,
         limitations_program_hash.clone(),
         inner_puzzle_hash_program.clone(),
     ]
     .to_vec();
-    let test_args = [ 
-        cat_hash_program.clone(),
-        limitations_program_hash.clone(),
-        inner_puzzle_hash_program,
-    ]
-    .to_vec();
-    println!("cat_hash_program: {}", bytes_to_hex(cat_hash_program.serialized));
  
-    println!("args: {}", bytes_to_hex(Program::from(test_args.clone()).serialized));
+  
 
     return cat_program.curry(args.clone());
 }

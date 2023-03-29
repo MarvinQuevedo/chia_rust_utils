@@ -218,8 +218,22 @@ pub extern "C" fn wire_program_run(
 }
 
 #[no_mangle]
+pub extern "C" fn wire_program_from_atom_bytes(port_: i64, program_bytes: *mut wire_uint_8_list) {
+    wire_program_from_atom_bytes_impl(port_, program_bytes)
+}
+
+#[no_mangle]
 pub extern "C" fn wire_get_puzzle_from_public_key(port_: i64, pk: *mut wire_uint_8_list) {
     wire_get_puzzle_from_public_key_impl(port_, pk)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_cats_create_cat_puzzle(
+    port_: i64,
+    tail_hash: *mut wire_uint_8_list,
+    inner_puzzle_hash: *mut wire_uint_8_list,
+) {
+    wire_cats_create_cat_puzzle_impl(port_, tail_hash, inner_puzzle_hash)
 }
 
 // Section: allocate functions

@@ -536,6 +536,22 @@ fn wire_program_run_impl(
         },
     )
 }
+fn wire_program_from_atom_bytes_impl(
+    port_: MessagePort,
+    program_bytes: impl Wire2Api<Vec<u8>> + UnwindSafe,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "program_from_atom_bytes",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_program_bytes = program_bytes.wire2api();
+            move |task_callback| Ok(program_from_atom_bytes(api_program_bytes))
+        },
+    )
+}
 fn wire_get_puzzle_from_public_key_impl(
     port_: MessagePort,
     pk: impl Wire2Api<Vec<u8>> + UnwindSafe,
@@ -549,6 +565,24 @@ fn wire_get_puzzle_from_public_key_impl(
         move || {
             let api_pk = pk.wire2api();
             move |task_callback| Ok(get_puzzle_from_public_key(api_pk))
+        },
+    )
+}
+fn wire_cats_create_cat_puzzle_impl(
+    port_: MessagePort,
+    tail_hash: impl Wire2Api<Vec<u8>> + UnwindSafe,
+    inner_puzzle_hash: impl Wire2Api<Vec<u8>> + UnwindSafe,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "cats_create_cat_puzzle",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_tail_hash = tail_hash.wire2api();
+            let api_inner_puzzle_hash = inner_puzzle_hash.wire2api();
+            move |task_callback| Ok(cats_create_cat_puzzle(api_tail_hash, api_inner_puzzle_hash))
         },
     )
 }

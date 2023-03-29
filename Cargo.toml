@@ -17,7 +17,7 @@ chia = { path = "../chia_rs", version = ">=0.2.4" }
 chia-bls = { path = "../chia_rs/chia-bls", version = ">=0.2.4" }
 clvm-utils = "0.2.4"
 clvmr = "0.1.24"
-clvm_tools_rs = { git = "https://github.com/MarvinQuevedo/clvm_tools_rs.git", rev ='fb506528eba43b742a54a3e20f31d74c05d1e5a2' }
+clvm_tools_rs = { git = "https://github.com/MarvinQuevedo/clvm_tools_rs.git", rev ='04cb88041132cbd805ea4e3ee9aa47014bfb2f4f' }
 serde = { version = "1.0", features = ["derive"] }
 lazy_static = "1.4.0"
 serde_derive = "1.0"

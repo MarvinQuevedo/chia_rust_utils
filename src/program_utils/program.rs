@@ -420,6 +420,7 @@ impl Into<SerializedProgram> for Program {
 }
 
 impl From<Vec<u8>> for Program {
+    /// Create a new  atom Program from a vector of bytes
     fn from(bytes: Vec<u8>) -> Self {
         let mut alloc = Allocator::new();
         let atom = match alloc.new_atom(bytes.as_slice()) {
@@ -441,6 +442,7 @@ impl From<Vec<u8>> for Program {
 }
 
 impl From<Vec<Program>> for Program {
+    /// Create a new Program from a vector of Programs
     fn from(program_list: Vec<Program>) -> Self {
         let mut actual = Program::new(Vec::new());
         let invert_list = program_list.iter().rev().collect::<Vec<&Program>>();

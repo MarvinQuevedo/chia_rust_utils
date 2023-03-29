@@ -378,6 +378,10 @@ pub fn program_run(program_bytes: Vec<u8>, args_str: Vec<String>) -> ApiOutputPr
         cost: run_result.cost,
     }
 }
+pub fn program_from_bytes(program_bytes: Vec<u8>) -> Vec<u8> {
+    let program = Program::from(&program_bytes);
+    program.serialized.clone()
+}
 
 pub fn get_puzzle_from_public_key(pk: Vec<u8>) -> Vec<u8> {
     let mut pk_array = [0u8; 48];

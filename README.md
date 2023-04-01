@@ -2,7 +2,7 @@
 
 
 Libraries:
-* [chia_rs](https://github.com/Chia-Network/chia_rs) [forked in](https://github.com/MarvinQuevedo/chia_rs)
+* [chia_rs](https://github.com/Chia-Network/chia_rs) forked in [MarvinQuevedo/chia_rs](https://github.com/MarvinQuevedo/chia_rs)
 * [clvm_rs](https://github.com/Chia-Network/clvm_rs)
 * [clvm_tools_rs](https://github.com/Chia-Network/clvm_tools_rs)
 * [rust-chia-types of GalactechsLLC](https://github.com/GalactechsLLC/rust-chia-types)

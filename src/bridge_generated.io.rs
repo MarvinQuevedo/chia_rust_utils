@@ -180,22 +180,22 @@ pub extern "C" fn wire_cmd_program_cldb(port_: i64, args: *mut wire_StringList) 
 }
 
 #[no_mangle]
-pub extern "C" fn wire_program_tree_hash(port_: i64, program_bytes: *mut wire_uint_8_list) {
-    wire_program_tree_hash_impl(port_, program_bytes)
+pub extern "C" fn wire_program_tree_hash(port_: i64, ser_program_bytes: *mut wire_uint_8_list) {
+    wire_program_tree_hash_impl(port_, ser_program_bytes)
 }
 
 #[no_mangle]
 pub extern "C" fn wire_program_curry(
     port_: i64,
-    program_bytes: *mut wire_uint_8_list,
+    ser_program_bytes: *mut wire_uint_8_list,
     args_str: *mut wire_StringList,
 ) {
-    wire_program_curry_impl(port_, program_bytes, args_str)
+    wire_program_curry_impl(port_, ser_program_bytes, args_str)
 }
 
 #[no_mangle]
-pub extern "C" fn wire_program_uncurry(port_: i64, program_bytes: *mut wire_uint_8_list) {
-    wire_program_uncurry_impl(port_, program_bytes)
+pub extern "C" fn wire_program_uncurry(port_: i64, ser_program_bytes: *mut wire_uint_8_list) {
+    wire_program_uncurry_impl(port_, ser_program_bytes)
 }
 
 #[no_mangle]
@@ -204,22 +204,30 @@ pub extern "C" fn wire_program_from_list(port_: i64, program_list: *mut wire_Str
 }
 
 #[no_mangle]
-pub extern "C" fn wire_program_disassemble(port_: i64, program_bytes: *mut wire_uint_8_list) {
-    wire_program_disassemble_impl(port_, program_bytes)
+pub extern "C" fn wire_program_disassemble(port_: i64, ser_program_bytes: *mut wire_uint_8_list) {
+    wire_program_disassemble_impl(port_, ser_program_bytes)
 }
 
 #[no_mangle]
 pub extern "C" fn wire_program_run(
     port_: i64,
-    program_bytes: *mut wire_uint_8_list,
+    ser_program_bytes: *mut wire_uint_8_list,
     args_str: *mut wire_StringList,
 ) {
-    wire_program_run_impl(port_, program_bytes, args_str)
+    wire_program_run_impl(port_, ser_program_bytes, args_str)
 }
 
 #[no_mangle]
-pub extern "C" fn wire_program_from_atom_bytes(port_: i64, program_bytes: *mut wire_uint_8_list) {
-    wire_program_from_atom_bytes_impl(port_, program_bytes)
+pub extern "C" fn wire_program_from_atom_bytes(
+    port_: i64,
+    ser_program_bytes: *mut wire_uint_8_list,
+) {
+    wire_program_from_atom_bytes_impl(port_, ser_program_bytes)
+}
+
+#[no_mangle]
+pub extern "C" fn wire_program_to_atom_bytes(port_: i64, ser_program_bytes: *mut wire_uint_8_list) {
+    wire_program_to_atom_bytes_impl(port_, ser_program_bytes)
 }
 
 #[no_mangle]

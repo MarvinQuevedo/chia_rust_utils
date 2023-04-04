@@ -438,7 +438,7 @@ fn wire_cmd_program_cldb_impl(port_: MessagePort, args: impl Wire2Api<Vec<String
 }
 fn wire_program_tree_hash_impl(
     port_: MessagePort,
-    program_bytes: impl Wire2Api<Vec<u8>> + UnwindSafe,
+    ser_program_bytes: impl Wire2Api<Vec<u8>> + UnwindSafe,
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
@@ -447,14 +447,14 @@ fn wire_program_tree_hash_impl(
             mode: FfiCallMode::Normal,
         },
         move || {
-            let api_program_bytes = program_bytes.wire2api();
-            move |task_callback| Ok(program_tree_hash(api_program_bytes))
+            let api_ser_program_bytes = ser_program_bytes.wire2api();
+            move |task_callback| Ok(program_tree_hash(api_ser_program_bytes))
         },
     )
 }
 fn wire_program_curry_impl(
     port_: MessagePort,
-    program_bytes: impl Wire2Api<Vec<u8>> + UnwindSafe,
+    ser_program_bytes: impl Wire2Api<Vec<u8>> + UnwindSafe,
     args_str: impl Wire2Api<Vec<String>> + UnwindSafe,
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
@@ -464,15 +464,15 @@ fn wire_program_curry_impl(
             mode: FfiCallMode::Normal,
         },
         move || {
-            let api_program_bytes = program_bytes.wire2api();
+            let api_ser_program_bytes = ser_program_bytes.wire2api();
             let api_args_str = args_str.wire2api();
-            move |task_callback| Ok(program_curry(api_program_bytes, api_args_str))
+            move |task_callback| Ok(program_curry(api_ser_program_bytes, api_args_str))
         },
     )
 }
 fn wire_program_uncurry_impl(
     port_: MessagePort,
-    program_bytes: impl Wire2Api<Vec<u8>> + UnwindSafe,
+    ser_program_bytes: impl Wire2Api<Vec<u8>> + UnwindSafe,
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
@@ -481,8 +481,8 @@ fn wire_program_uncurry_impl(
             mode: FfiCallMode::Normal,
         },
         move || {
-            let api_program_bytes = program_bytes.wire2api();
-            move |task_callback| Ok(program_uncurry(api_program_bytes))
+            let api_ser_program_bytes = ser_program_bytes.wire2api();
+            move |task_callback| Ok(program_uncurry(api_ser_program_bytes))
         },
     )
 }
@@ -504,7 +504,7 @@ fn wire_program_from_list_impl(
 }
 fn wire_program_disassemble_impl(
     port_: MessagePort,
-    program_bytes: impl Wire2Api<Vec<u8>> + UnwindSafe,
+    ser_program_bytes: impl Wire2Api<Vec<u8>> + UnwindSafe,
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
@@ -513,14 +513,14 @@ fn wire_program_disassemble_impl(
             mode: FfiCallMode::Normal,
         },
         move || {
-            let api_program_bytes = program_bytes.wire2api();
-            move |task_callback| Ok(program_disassemble(api_program_bytes))
+            let api_ser_program_bytes = ser_program_bytes.wire2api();
+            move |task_callback| Ok(program_disassemble(api_ser_program_bytes))
         },
     )
 }
 fn wire_program_run_impl(
     port_: MessagePort,
-    program_bytes: impl Wire2Api<Vec<u8>> + UnwindSafe,
+    ser_program_bytes: impl Wire2Api<Vec<u8>> + UnwindSafe,
     args_str: impl Wire2Api<Vec<String>> + UnwindSafe,
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
@@ -530,15 +530,15 @@ fn wire_program_run_impl(
             mode: FfiCallMode::Normal,
         },
         move || {
-            let api_program_bytes = program_bytes.wire2api();
+            let api_ser_program_bytes = ser_program_bytes.wire2api();
             let api_args_str = args_str.wire2api();
-            move |task_callback| Ok(program_run(api_program_bytes, api_args_str))
+            move |task_callback| Ok(program_run(api_ser_program_bytes, api_args_str))
         },
     )
 }
 fn wire_program_from_atom_bytes_impl(
     port_: MessagePort,
-    program_bytes: impl Wire2Api<Vec<u8>> + UnwindSafe,
+    ser_program_bytes: impl Wire2Api<Vec<u8>> + UnwindSafe,
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
@@ -547,8 +547,24 @@ fn wire_program_from_atom_bytes_impl(
             mode: FfiCallMode::Normal,
         },
         move || {
-            let api_program_bytes = program_bytes.wire2api();
-            move |task_callback| Ok(program_from_atom_bytes(api_program_bytes))
+            let api_ser_program_bytes = ser_program_bytes.wire2api();
+            move |task_callback| Ok(program_from_atom_bytes(api_ser_program_bytes))
+        },
+    )
+}
+fn wire_program_to_atom_bytes_impl(
+    port_: MessagePort,
+    ser_program_bytes: impl Wire2Api<Vec<u8>> + UnwindSafe,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "program_to_atom_bytes",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_ser_program_bytes = ser_program_bytes.wire2api();
+            move |task_callback| Ok(program_to_atom_bytes(api_ser_program_bytes))
         },
     )
 }

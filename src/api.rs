@@ -294,21 +294,21 @@ pub fn cmd_program_cldb(args: Vec<String>) -> String {
     }
 }
 
-pub fn program_tree_hash(program_bytes: Vec<u8>) -> [u8; 32] {
-    let program = SerializedProgram::from_bytes(&program_bytes)
+pub fn program_tree_hash(ser_program_bytes: Vec<u8>) -> [u8; 32] {
+    let program = SerializedProgram::from_bytes(&ser_program_bytes)
         .to_program()
         .unwrap();
     return program.tree_hash().to_sized_bytes();
 }
 
-pub fn program_curry(program_bytes: Vec<u8>, args_str: Vec<String>) -> Vec<u8> {
+pub fn program_curry(ser_program_bytes: Vec<u8>, args_str: Vec<String>) -> Vec<u8> {
     let args = args_str;
     let mut args_vec: Vec<Program> = Vec::new();
     for arg in args {
         let program_serialized = SerializedProgram::from(arg.to_string());
         args_vec.push(program_serialized.to_program().unwrap());
     }
-    let raw_program = SerializedProgram::from_bytes(&program_bytes)
+    let raw_program = SerializedProgram::from_bytes(&ser_program_bytes)
         .to_program()
         .unwrap();
     let curried = curry(&raw_program, args_vec);
@@ -316,8 +316,8 @@ pub fn program_curry(program_bytes: Vec<u8>, args_str: Vec<String>) -> Vec<u8> {
     program_result.serialized.clone()
 }
 
-pub fn program_uncurry(program_bytes: Vec<u8>) -> UncurriedProgramToDart {
-    let raw_program = SerializedProgram::from_bytes(&program_bytes)
+pub fn program_uncurry(ser_program_bytes: Vec<u8>) -> UncurriedProgramToDart {
+    let raw_program = SerializedProgram::from_bytes(&ser_program_bytes)
         .to_program()
         .unwrap();
     let uncurried = raw_program.uncurry();
@@ -342,8 +342,8 @@ pub fn program_from_list(program_list: Vec<String>) -> Vec<u8> {
     actual.serialized.clone()
 }
 
-pub fn program_disassemble(program_bytes: Vec<u8>) -> String {
-    let mut stream = Stream::new(Some(Bytes::new(Some(BytesFromType::Raw(program_bytes)))));
+pub fn program_disassemble(ser_program_bytes: Vec<u8>) -> String {
+    let mut stream = Stream::new(Some(Bytes::new(Some(BytesFromType::Raw(ser_program_bytes)))));
     let mut allocator = Allocator::new();
 
     let result = sexp_from_stream(
@@ -361,14 +361,14 @@ pub fn program_disassemble(program_bytes: Vec<u8>) -> String {
     result.rest().to_string()
 }
 
-pub fn program_run(program_bytes: Vec<u8>, args_str: Vec<String>) -> ApiOutputProgram {
+pub fn program_run(ser_program_bytes: Vec<u8>, args_str: Vec<String>) -> ApiOutputProgram {
     let args = args_str;
     let mut args_vec: Vec<Program> = Vec::new();
     for arg in args {
         let program_serialized = SerializedProgram::from(arg.to_string());
         args_vec.push(program_serialized.to_program().unwrap());
     }
-    let raw_program = SerializedProgram::from_bytes(&program_bytes)
+    let raw_program = SerializedProgram::from_bytes(&ser_program_bytes)
         .to_program()
         .unwrap();
     let args_program = Program::from(args_vec);
@@ -378,9 +378,16 @@ pub fn program_run(program_bytes: Vec<u8>, args_str: Vec<String>) -> ApiOutputPr
         cost: run_result.cost,
     }
 }
-pub fn program_from_atom_bytes(program_bytes: Vec<u8>) -> Vec<u8> {
-    let program = Program::from(&program_bytes);
+pub fn program_from_atom_bytes(ser_program_bytes: Vec<u8>) -> Vec<u8> {
+    let program = Program::from(&ser_program_bytes);
     program.serialized.clone()
+}
+pub fn program_to_atom_bytes(ser_program_bytes: Vec<u8>) -> Vec<u8> {
+    let program = SerializedProgram::from_bytes(&ser_program_bytes)
+        .to_program()
+        .unwrap();
+    let atom = program.as_atom().unwrap();
+    atom.serialized.clone()
 }
 
 pub fn get_puzzle_from_public_key(pk: Vec<u8>) -> Vec<u8> {

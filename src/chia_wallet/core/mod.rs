@@ -1,6 +1,7 @@
 pub mod bls_mods;
 pub mod bytes;
 pub mod bytes_utils;
+pub mod conditions;
 pub mod exceptions;
 pub mod keychain;
 pub mod serialization;

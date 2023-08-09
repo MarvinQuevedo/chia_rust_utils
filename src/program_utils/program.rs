@@ -219,6 +219,22 @@ impl Program {
         }
         rtn
     }
+    pub fn to_list(&mut self) -> Vec<Self> {
+        let mut rtn: Vec<Program> = Vec::new();
+        let mut current = self.clone();
+        loop {
+            match current.as_pair() {
+                None => {
+                    break;
+                }
+                Some((first, rest)) => {
+                    rtn.push(first);
+                    current = rest;
+                }
+            }
+        }
+        rtn
+    }
 
     pub fn to_map(self) -> Result<HashMap<Program, Program>, Box<dyn Error>> {
         let mut rtn: HashMap<Program, Program> = HashMap::new();
@@ -632,6 +648,12 @@ impl Program {
         };
         prog.set_node();
         prog
+    }
+    pub fn nil() -> Self {
+        Program::null()
+    }
+    pub fn is_null(&self) -> bool {
+        self.serialized == Program::null().serialized
     }
     fn set_node(&mut self) {
         self.nodeptr = match node_from_bytes(&mut self.alloc, &self.serialized) {

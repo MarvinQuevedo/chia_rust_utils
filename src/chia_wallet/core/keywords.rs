@@ -2,42 +2,49 @@ use std::collections::HashMap;
 
 use num_bigint::BigInt;
 
+macro_rules! keyword {
+    ($map:expr, $key:expr, $value:expr) => {
+        $map.insert($key.to_string(), BigInt::from($value));
+    };
+}
+
 lazy_static::lazy_static! {
     static ref KEYWORDS: HashMap<String, BigInt> = {
+
         let mut map = HashMap::new();
-        map.insert("q".to_string(), BigInt::from(0x01));
-        map.insert("a".to_string(), BigInt::from(0x02));
-        map.insert("i".to_string(), BigInt::from(0x03));
-        map.insert("c".to_string(), BigInt::from(0x04));
-        map.insert("f".to_string(), BigInt::from(0x05));
-        map.insert("r".to_string(), BigInt::from(0x06));
-        map.insert("l".to_string(), BigInt::from(0x07));
-        map.insert("x".to_string(), BigInt::from(0x08));
-        map.insert("=".to_string(), BigInt::from(0x09));
-        map.insert(">s".to_string(), BigInt::from(0x0a));
-        map.insert("sha256".to_string(), BigInt::from(0x0b));
-        map.insert("substr".to_string(), BigInt::from(0x0c));
-        map.insert("strlen".to_string(), BigInt::from(0x0d));
-        map.insert("concat".to_string(), BigInt::from(0x0e));
-        map.insert("+".to_string(), BigInt::from(0x10));
-        map.insert("-".to_string(), BigInt::from(0x11));
-        map.insert("*".to_string(), BigInt::from(0x12));
-        map.insert("/".to_string(), BigInt::from(0x13));
-        map.insert("divmod".to_string(), BigInt::from(0x14));
-        map.insert(">".to_string(), BigInt::from(0x15));
-        map.insert("ash".to_string(), BigInt::from(0x16));
-        map.insert("lsh".to_string(), BigInt::from(0x17));
-        map.insert("logand".to_string(), BigInt::from(0x18));
-        map.insert("logior".to_string(), BigInt::from(0x19));
-        map.insert("logxor".to_string(), BigInt::from(0x1a));
-        map.insert("lognot".to_string(), BigInt::from(0x1b));
-        map.insert("point_add".to_string(), BigInt::from(0x1d));
-        map.insert("pubkey_for_exp".to_string(), BigInt::from(0x1e));
-        map.insert("not".to_string(), BigInt::from(0x20));
-        map.insert("any".to_string(), BigInt::from(0x21));
-        map.insert("all".to_string(), BigInt::from(0x22));
-        map.insert(".".to_string(), BigInt::from(0x23));
-        map.insert("softfork".to_string(), BigInt::from(0x24));
+        keyword!(map, "q", 0x01);
+        keyword!(map, "a", 0x02);
+        keyword!(map, "i", 0x03);
+        keyword!(map, "c", 0x04);
+        keyword!(map, "f", 0x05);
+        keyword!(map, "r", 0x06);
+        keyword!(map, "l", 0x07);
+        keyword!(map, "x", 0x08);
+        keyword!(map, "=", 0x09);
+        keyword!(map, ">s", 0x0a);
+        keyword!(map, "sha256", 0x0b);
+        keyword!(map, "substr", 0x0c);
+        keyword!(map, "strlen", 0x0d);
+        keyword!(map, "concat", 0x0e);
+        keyword!(map, "+", 0x10);
+        keyword!(map, "-", 0x11);
+        keyword!(map, "*", 0x12);
+        keyword!(map, "/", 0x13);
+        keyword!(map, "divmod", 0x14);
+        keyword!(map, ">", 0x15);
+        keyword!(map, "ash", 0x16);
+        keyword!(map, "lsh", 0x17);
+        keyword!(map, "logand", 0x18);
+        keyword!(map, "logior", 0x19);
+        keyword!(map, "logxor", 0x1a);
+        keyword!(map, "lognot", 0x1b);
+        keyword!(map, "point_add", 0x1d);
+        keyword!(map, "pubkey_for_exp", 0x1e);
+        keyword!(map, "not", 0x20);
+        keyword!(map, "any", 0x21);
+        keyword!(map, "all", 0x22);
+        keyword!(map, ".", 0x23);
+        keyword!(map, "softfork", 0x24);
         map
     };
 }

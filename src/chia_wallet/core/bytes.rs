@@ -8,6 +8,36 @@ use crate::program_utils::program::Program;
 #[derive(Debug, PartialEq, Eq)]
 pub struct Puzzlehash([u8; 48]);
 
+impl Puzzlehash {
+    pub fn from_bytes(bytes: &[u8]) -> Self {
+        let mut puzzlehash_bytes = [0u8; 48];
+        for i in 0..48 {
+            puzzlehash_bytes[i] = bytes[i];
+        }
+        Puzzlehash(puzzlehash_bytes)
+    }
+    pub fn from_atom(program: Program) -> Self {
+        let mut puzzlehash_bytes = [0u8; 48];
+        let atom_bytes = program.as_vec().unwrap();
+        for i in 0..48 {
+            puzzlehash_bytes[i] = atom_bytes[i];
+        }
+        Puzzlehash(puzzlehash_bytes)
+    }
+}
+
+// from WrapperBytes
+impl From<WrapperBytes> for Puzzlehash {
+    fn from(bytes: WrapperBytes) -> Self {
+        let mut puzzlehash_bytes = [0u8; 48];
+        for i in 0..48 {
+            puzzlehash_bytes[i] = bytes.raw()[i];
+        }
+        Puzzlehash(puzzlehash_bytes)
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct WrapperBytes(pub Bytes);
 
 impl WrapperBytes {
@@ -49,8 +79,8 @@ impl Puzzlehash {
     pub fn byte_list(&self) -> &[u8; 48] {
         &self.0
     }
-    pub fn to_bytes(&self) -> Bytes {
-        return Bytes::new(Some(BytesFromType::Raw(self.0.to_vec())));
+    pub fn to_bytes(&self) -> WrapperBytes {
+        return WrapperBytes::from(self.0.to_vec());
     }
 }
 

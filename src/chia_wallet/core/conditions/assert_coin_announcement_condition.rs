@@ -1,7 +1,9 @@
 use crate::chia_wallet::core::conditions::conditions::Condition;
 use crate::{chia_wallet::core::bytes::WrapperBytes, program_utils::program::Program};
 
-struct AssertCoinAnnouncementCondition {
+use super::conditions::check_is_this_condition;
+
+pub struct AssertCoinAnnouncementCondition {
     coin_id: WrapperBytes,
     message: WrapperBytes,
     morph_bytes: Option<WrapperBytes>,
@@ -10,7 +12,7 @@ struct AssertCoinAnnouncementCondition {
 impl Condition for AssertCoinAnnouncementCondition {
     fn program(&self) -> Program {
         let list_data = [
-            Program::from(AssertCoinAnnouncementCondition::CONDITION_CODE),
+            Program::from(Self::CONDITION_CODE),
             Program::from(self.announcement_id().raw()),
         ]
         .to_vec();
@@ -20,7 +22,7 @@ impl Condition for AssertCoinAnnouncementCondition {
 }
 
 impl AssertCoinAnnouncementCondition {
-    const CONDITION_CODE: i32 = 61;
+    const CONDITION_CODE: u32 = 61;
 
     pub fn announcement_id(&self) -> WrapperBytes {
         if let Some(morph_bytes) = &self.morph_bytes {
@@ -34,7 +36,7 @@ impl AssertCoinAnnouncementCondition {
         }
     }
 
-    fn program_list(&self) -> Program {
+    pub fn program_list(&self) -> Program {
         if let Some(morph_bytes) = &self.morph_bytes {
             let program_vec = [
                 Program::from(self.coin_id.raw()),
@@ -67,5 +69,9 @@ impl AssertCoinAnnouncementCondition {
             message,
             morph_bytes,
         }
+    }
+
+    pub fn is_this_condition(condition: &Program) -> bool {
+        check_is_this_condition(condition, Self::CONDITION_CODE)
     }
 }

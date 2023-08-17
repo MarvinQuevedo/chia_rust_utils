@@ -1,3 +1,4 @@
+use lazy_static::lazy_static;
 use std::collections::HashMap;
 
 use num_bigint::BigInt;
@@ -8,9 +9,8 @@ macro_rules! keyword {
     };
 }
 
-lazy_static::lazy_static! {
-    static ref KEYWORDS: HashMap<String, BigInt> = {
-
+lazy_static! {
+    pub static ref KEYWORDS: HashMap<String, BigInt> = {
         let mut map = HashMap::new();
         keyword!(map, "q", 0x01);
         keyword!(map, "a", 0x02);
@@ -47,4 +47,8 @@ lazy_static::lazy_static! {
         keyword!(map, "softfork", 0x24);
         map
     };
+}
+
+pub fn keyword(name: &str) -> Option<&BigInt> {
+    KEYWORDS.get(name)
 }

@@ -12,9 +12,9 @@ use crate::{
             create_coin_announcement_condition::CreateCoinAnnouncementCondition,
             create_puzzle_announcement_condition::CreatePuzzleAnnouncementCondition,
         },
+        keywords::keyword,
         payment::Payment,
     },
-    keyword,
     program_utils::{
         program::Program, serialize::node_to_bytes, serialized_program::SerializedProgram,
     },
@@ -136,7 +136,7 @@ impl BaseWallet {
         Ok(())
     }
     pub fn make_solution_from_conditions(conditions: Vec<Box<dyn Condition>>) -> Program {
-        let mut program_list = vec![Program::from(&keyword!("q"))];
+        let mut program_list = vec![Program::from(keyword("q").unwrap())];
         for condition in conditions {
             program_list.push(condition.program());
         }

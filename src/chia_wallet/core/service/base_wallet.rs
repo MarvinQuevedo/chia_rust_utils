@@ -136,7 +136,7 @@ impl BaseWallet {
         Ok(())
     }
     pub fn make_solution_from_conditions(conditions: Vec<Box<dyn Condition>>) -> Program {
-        let mut program_list = vec![Program::from(keyword("q").unwrap())];
+        let mut program_list = vec![Program::from(keyword("q"))];
         for condition in conditions {
             program_list.push(condition.program());
         }

@@ -49,6 +49,6 @@ lazy_static! {
     };
 }
 
-pub fn keyword(name: &str) -> Option<&BigInt> {
-    KEYWORDS.get(name)
+pub fn keyword(name: &str) -> &BigInt {
+    KEYWORDS.get(name).unwrap()
 }

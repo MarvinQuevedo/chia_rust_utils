@@ -4,7 +4,7 @@ use crate::{
         blockchain_network::BlockchainNetwork,
         bytes::WrapperBytes,
         conditions::condition_opcode::ConditionOpcode,
-        conditions::conditions::Condition,
+        conditions::{agg_sig_me_condition::AggSigMeCondition, conditions::Condition},
         conditions::{
             assert_coin_announcement_condition::AssertCoinAnnouncementCondition,
             assert_puzzle_announcement_condition::AssertPuzzleAnnouncementConditionImp,
@@ -29,7 +29,38 @@ struct BaseWallet {
 }
 
 impl BaseWallet {
-    fn conditions_for_solution(
+    pub fn get_add_sig_me_message_from_result(
+        result: Program,
+        coin: Coin,
+        network: BlockchainNetwork,
+    ) -> WrapperBytes {
+        let all_items = result.clone().to_list();
+
+        let agg_sig_me_condition =
+            all_items
+                .iter()
+                .filter_map(|e| match AggSigMeCondition::is_this_condition(e) {
+                    true => Some(e.clone()),
+                    false => None,
+                });
+
+        let agg_sig_me_condition = agg_sig_me_condition.collect::<Vec<Program>>()[2]
+            .as_vec()
+            .unwrap();
+
+        let id = coin.name().bytes;
+        let extra_data = WrapperBytes::from_string_hex(&network.agg_sig_me_extra_data)
+            .unwrap()
+            .raw();
+        let mut message = Vec::new();
+
+        message.extend_from_slice(&agg_sig_me_condition);
+        message.extend_from_slice(&id);
+        message.extend_from_slice(&extra_data);
+
+        WrapperBytes::from(message)
+    }
+    pub fn conditions_for_solution(
         puzzle_reveal: SerializedProgram,
         solution: SerializedProgram,
         max_cost: u64,
@@ -56,7 +87,7 @@ impl BaseWallet {
         }
     }
 
-    fn conditions_dict_for_solution(
+    pub fn conditions_dict_for_solution(
         puzzle_reveal: SerializedProgram,
         solution: SerializedProgram,
         max_cost: u64,
@@ -165,7 +196,7 @@ impl BaseWallet {
         (None, Some(results))
     }
 
-    fn make_solution(
+    pub fn make_solution(
         primaries: Vec<Payment>,
         coin_announcements_to_assert: Vec<AssertCoinAnnouncementCondition>,
         puzzle_announcements_to_assert: Vec<AssertPuzzleAnnouncementConditionImp>,

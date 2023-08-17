@@ -1,9 +1,6 @@
 use num_bigint::BigInt;
 
-use crate::{
-    chia_wallet::core::bytes_utils::{bytes_to_int, int_to_bytes, u8_to_bytes, Endian},
-    program_utils::program::Program,
-};
+use crate::program_utils::program::Program;
 
 pub trait Condition {
     fn program(&self) -> Program;

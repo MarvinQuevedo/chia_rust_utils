@@ -1,11 +1,10 @@
-use chia_bls::{public_key::PublicKey, signature::Signature};
-
 use crate::{
     blockchain::{coin::Coin, coin_spend::CoinSpend},
     chia_wallet::core::{
         blockchain_network::BlockchainNetwork,
         bytes::WrapperBytes,
         conditions::condition_opcode::ConditionOpcode,
+        conditions::conditions::Condition,
         conditions::{
             assert_coin_announcement_condition::AssertCoinAnnouncementCondition,
             assert_puzzle_announcement_condition::AssertPuzzleAnnouncementConditionImp,
@@ -13,21 +12,82 @@ use crate::{
             create_coin_announcement_condition::CreateCoinAnnouncementCondition,
             create_puzzle_announcement_condition::CreatePuzzleAnnouncementCondition,
         },
-        conditions::{
-            assert_puzzle_announcement_condition::AssertPuzzleAnnouncementCondition,
-            conditions::Condition,
-        },
         payment::Payment,
     },
     keyword,
-    program_utils::{keywords::KEYWORDS, program::Program},
+    program_utils::{
+        program::Program, serialize::node_to_bytes, serialized_program::SerializedProgram,
+    },
 };
+use chia_bls::signature::Signature;
+use clvmr::{allocator::Allocator, node::Node};
+use num_bigint::BigInt;
+use std::collections::HashMap;
 use std::collections::HashSet;
 struct BaseWallet {
     network: BlockchainNetwork,
 }
 
 impl BaseWallet {
+    fn conditions_for_solution(
+        puzzle_reveal: SerializedProgram,
+        solution: SerializedProgram,
+        max_cost: u64,
+    ) -> (Option<Exception>, Option<Vec<ConditionWithArgs>>, BigInt) {
+        let mut allocator = Allocator::new();
+        match puzzle_reveal.run_with_cost(
+            &mut allocator,
+            max_cost,
+            &Program::new(solution.to_bytes()),
+        ) {
+            Ok((cost, r)) => {
+                let node = Node::new(&allocator, r);
+                match node_to_bytes(&node) {
+                    Ok(byte_data) => {
+                        let serial_program = SerializedProgram::from_bytes(&byte_data);
+                        let parsed =
+                            Self::parse_sexp_to_conditions(serial_program.to_program().unwrap());
+                        (parsed.0, parsed.1, BigInt::from(cost))
+                    }
+                    Err(_) => (Some(Exception("INVALID_SOLUTION")), None, BigInt::from(0)),
+                }
+            }
+            Err(_) => (Some(Exception("INVALID_SOLUTION")), None, BigInt::from(0)),
+        }
+    }
+
+    fn conditions_dict_for_solution(
+        puzzle_reveal: SerializedProgram,
+        solution: SerializedProgram,
+        max_cost: u64,
+    ) -> (
+        Option<Exception>,
+        Option<HashMap<ConditionOpcode, Vec<ConditionWithArgs>>>,
+        BigInt,
+    ) {
+        let result = Self::conditions_for_solution(puzzle_reveal, solution, max_cost);
+        if let Some(e) = result.0 {
+            return (Some(e), None, result.2);
+        }
+        let dict_result = Self::conditions_by_opcode(result.1.unwrap());
+        (None, Some(dict_result), result.2)
+    }
+    pub fn conditions_by_opcode(
+        conditions: Vec<ConditionWithArgs>,
+    ) -> HashMap<ConditionOpcode, Vec<ConditionWithArgs>> {
+        let mut hm: HashMap<ConditionOpcode, Vec<ConditionWithArgs>> = HashMap::new();
+        for cvp in conditions {
+            match hm.get_mut(&cvp.condition_opcode) {
+                Some(list) => {
+                    list.push(cvp.clone());
+                }
+                None => {
+                    hm.insert(cvp.condition_opcode.clone(), vec![cvp.clone()]);
+                }
+            }
+        }
+        return hm;
+    }
     pub fn check_for_duplicate_coins(coins: Vec<Coin>) -> Result<(), DuplicateCoinException> {
         let mut id_set: HashSet<String> = HashSet::new();
 

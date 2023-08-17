@@ -17,6 +17,10 @@ pub fn num_bits(mut value: i32) -> usize {
     bits
 }
 
+pub fn u8_to_bytes(value: u8) -> Vec<u8> {
+    int_to_bytes(value.into(), 2, Endian::Big, false)
+}
+
 pub fn int_to_bytes(value: i32, size: usize, endian: Endian, signed: bool) -> Vec<u8> {
     if value < 0 && !signed {
         panic!("Cannot convert negative int to unsigned.");

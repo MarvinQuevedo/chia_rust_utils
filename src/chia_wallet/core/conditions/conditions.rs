@@ -1,6 +1,9 @@
 use num_bigint::BigInt;
 
-use crate::program_utils::program::Program;
+use crate::{
+    chia_wallet::core::bytes_utils::{bytes_to_int, int_to_bytes, u8_to_bytes, Endian},
+    program_utils::program::Program,
+};
 
 pub trait Condition {
     fn program(&self) -> Program;
@@ -31,4 +34,12 @@ pub fn check_is_this_condition_with_parts_len(
     }
 
     true
+}
+
+pub fn conditions_to_program(conditions: Vec<Box<dyn Condition>>) -> Program {
+    let program_vec: Vec<Program> = conditions
+        .iter()
+        .map(|condition| condition.program().clone())
+        .collect();
+    Program::from(program_vec)
 }

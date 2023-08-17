@@ -11,6 +11,16 @@ pub struct ConditionWithArgs {
     pub vars: Vec<Vec<u8>>,
 }
 
+impl Clone for ConditionWithArgs {
+    fn clone(&self) -> Self {
+        ConditionWithArgs {
+            condition_opcode: self.condition_opcode.clone(),
+            vars: self.vars.clone(),
+        }
+    }
+}
+
+#[derive(Clone, Hash)]
 pub struct ConditionOpcode(u8);
 
 impl ConditionOpcode {

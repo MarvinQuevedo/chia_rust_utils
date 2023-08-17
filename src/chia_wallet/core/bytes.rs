@@ -3,6 +3,7 @@ use std::io::Read;
 
 use clvm_tools_rs::classic::clvm::__type_compatibility__::{sha256, Bytes, BytesFromType};
 
+use crate::blockchain::sized_bytes::Bytes32;
 use crate::program_utils::program::Program;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -63,6 +64,14 @@ impl From<Vec<u8>> for WrapperBytes {
 impl From<Bytes> for WrapperBytes {
     fn from(bytes: Bytes) -> Self {
         WrapperBytes(bytes)
+    }
+}
+
+impl From<Bytes32> for WrapperBytes {
+    fn from(bytes: Bytes32) -> Self {
+        WrapperBytes(Bytes::new(Some(BytesFromType::Raw(
+            bytes.to_sized_bytes().to_vec(),
+        ))))
     }
 }
 

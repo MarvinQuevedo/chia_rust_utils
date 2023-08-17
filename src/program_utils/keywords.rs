@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use num::BigInt;
+use std::collections::HashMap;
 
 lazy_static::lazy_static! {
     pub static ref KEYWORDS: HashMap<String, BigInt> = {
@@ -38,5 +38,12 @@ lazy_static::lazy_static! {
         map.insert(String::from("."), BigInt::from(0x23));
         map.insert(String::from("softfork"), BigInt::from(0x24));
         map
+    };
+}
+
+#[macro_export]
+macro_rules! keyword {
+    ($name:expr) => {
+        *KEYWORDS.get($name).unwrap()
     };
 }

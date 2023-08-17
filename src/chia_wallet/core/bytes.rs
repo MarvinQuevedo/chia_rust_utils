@@ -51,6 +51,16 @@ impl WrapperBytes {
     pub fn raw(&self) -> Vec<u8> {
         self.0.raw()
     }
+    pub fn from_string_hex(hex: &String) -> Result<Self, std::io::Error> {
+        let mut bytes = Vec::new();
+        hex::decode_to_slice(hex, &mut bytes);
+        Ok(WrapperBytes(Bytes::new(Some(BytesFromType::Raw(bytes)))))
+    }
+    pub fn from_str_hex(hex: &str) -> Result<Self, std::io::Error> {
+        let mut bytes = Vec::new();
+        hex::decode_to_slice(hex, &mut bytes);
+        Ok(WrapperBytes(Bytes::new(Some(BytesFromType::Raw(bytes)))))
+    }
 
     pub fn from_atom(program: Program) -> Self {
         WrapperBytes::from(program.as_vec().unwrap())

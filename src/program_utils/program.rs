@@ -24,6 +24,8 @@ use std::fmt;
 use std::hash::Hash;
 use std::hash::Hasher;
 
+use super::curry_utils::assemble;
+
 /* pub fn program_from_list(program_list: Vec<Program>) -> Program {
     let mut actual = Program::null();
         for element in program_list {
@@ -141,6 +143,11 @@ pub struct UncurriedProgram {
     pub args: Vec<Program>,
 }
 impl Program {
+    pub fn from_source(source: &str) -> Program {
+        let serialized_program = assemble(source);
+        return serialized_program.to_program().unwrap();
+    }
+
     pub fn curry(&self, args: Vec<Program>) -> Program {
         /*  let (_cost, program) = curry_utils::curry(&self, args).unwrap();
         program */

@@ -23,6 +23,13 @@ impl Condition for AssertCoinAnnouncementCondition {
 
 impl AssertCoinAnnouncementCondition {
     const CONDITION_CODE: u32 = 61;
+    pub fn new(coin_id: WrapperBytes, message: WrapperBytes) -> Self {
+        AssertCoinAnnouncementCondition {
+            coin_id,
+            message,
+            morph_bytes: None,
+        }
+    }
 
     pub fn announcement_id(&self) -> WrapperBytes {
         if let Some(morph_bytes) = &self.morph_bytes {

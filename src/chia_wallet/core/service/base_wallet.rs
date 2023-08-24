@@ -2,7 +2,7 @@ use crate::{
     blockchain::{coin::Coin, coin_spend::CoinSpend},
     chia_wallet::core::{
         blockchain_network::BlockchainNetwork,
-        bytes::WrapperBytes,
+        bytes::{Puzzlehash, WrapperBytes},
         conditions::condition_opcode::ConditionOpcode,
         conditions::{agg_sig_me_condition::AggSigMeCondition, conditions::Condition},
         conditions::{
@@ -49,7 +49,7 @@ impl BaseWallet {
             .unwrap();
 
         let id = coin.name().bytes;
-        let extra_data = WrapperBytes::from_string_hex(&network.agg_sig_me_extra_data)
+        let extra_data = WrapperBytes::from_hex(&network.agg_sig_me_extra_data)
             .unwrap()
             .raw();
         let mut message = Vec::new();
@@ -254,4 +254,41 @@ impl CoinSpendAndSignature {
             signature,
         }
     }
+}
+
+#[test]
+fn test_make_solution() {
+    let launcher_id =
+        WrapperBytes::from_hex("c8109361adf2cd32c07587312052ddbc8bf61eb4644fd6351e1cf1f814f272fb")
+            .unwrap()
+            .as_puzzlehash();
+    let eve_full_puz = Program::from_source("(a (q #a 4 (c 2 (c 5 (c 7 0)))) (c (q (c (q . 2) (c (c (q . 1) 5) (c (a 6 (c 2 (c 11 (q 1)))) 0))) #a (i 5 (q 4 (q . 4) (c (c (q . 1) 9) (c (a 6 (c 2 (c 13 (c 11 0)))) 0))) (q . 11)) 1) 1))");
+    let announcement_message = Program::from(vec![
+        Program::from(eve_full_puz.tree_hash()),
+        Program::from(1),
+        Program::from(Vec::<Program>::new()),
+    ])
+    .tree_hash();
+    let assert_coin_announcement = AssertCoinAnnouncementCondition::new(
+        launcher_id.to_bytes(),
+        WrapperBytes::from(announcement_message),
+    );
+    let ph =
+        WrapperBytes::from_hex(&"e30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18c")
+            .unwrap()
+            .as_puzzlehash();
+    let coin_announcements = HashSet::new();
+    let puzzle_announcements = HashSet::new();
+    let primaries = vec![Payment::new(BigInt::from(100), ph, None)];
+    let solution = BaseWallet::make_solution(
+        primaries,
+        vec![assert_coin_announcement],
+        vec![],
+        coin_announcements,
+        puzzle_announcements,
+    );
+    assert_eq!(
+        "(() (q (63 0xe30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18c 100) (61 0xb334ae7173a5e65e0a380952707904ae22fd097e11d5101f2c1876b74f5ca33e)) ())",
+        solution.disassemble()
+    );
 }

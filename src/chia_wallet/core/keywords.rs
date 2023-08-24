@@ -52,3 +52,11 @@ lazy_static! {
 pub fn keyword(name: &str) -> &BigInt {
     KEYWORDS.get(name).unwrap()
 }
+
+// create test here
+
+#[test]
+fn test_keyword() {
+    let keyword = keyword("q");
+    assert_eq!(keyword, &BigInt::from(0x01));
+}

@@ -162,3 +162,9 @@ pub enum Endian {
     Little,
     Big,
 }
+
+#[test]
+fn u8_to_bytes_test() {
+    let result = u8_to_bytes(1);
+    assert_eq!(result, vec![0, 1]);
+}

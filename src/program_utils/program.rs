@@ -148,6 +148,10 @@ impl Program {
         return serialized_program.to_program().unwrap();
     }
 
+    pub fn as_serialized_program(&self) -> SerializedProgram {
+        SerializedProgram::from_bytes(&self.serialized)
+    }
+
     pub fn curry(&self, args: Vec<Program>) -> Program {
         /*  let (_cost, program) = curry_utils::curry(&self, args).unwrap();
         program */
@@ -433,6 +437,9 @@ impl Program {
         .unwrap();
 
         result.rest().to_string()
+    }
+    pub fn to_source(&self) -> String {
+        self.disassemble()
     }
 }
 

@@ -6,41 +6,19 @@ use clvm_tools_rs::classic::clvm::__type_compatibility__::{sha256, Bytes, BytesF
 use crate::blockchain::sized_bytes::Bytes32;
 use crate::program_utils::program::Program;
 
-#[derive(Debug, PartialEq, Eq)]
-pub struct Puzzlehash([u8; 32]);
-
-impl Puzzlehash {
-    pub fn from_bytes(bytes: &[u8]) -> Self {
-        let mut puzzlehash_bytes = [0u8; 32];
-
-        for i in 0..32 {
-            puzzlehash_bytes[i] = bytes[i];
-        }
-        Puzzlehash(puzzlehash_bytes)
-    }
-    pub fn from_atom(program: Program) -> Self {
-        let mut puzzlehash_bytes = [0u8; 32];
-        let atom_bytes = program.as_vec().unwrap();
-        for i in 0..32 {
-            puzzlehash_bytes[i] = atom_bytes[i];
-        }
-        Puzzlehash(puzzlehash_bytes)
-    }
-}
-
-// from WrapperBytes
-impl From<WrapperBytes> for Puzzlehash {
-    fn from(bytes: WrapperBytes) -> Self {
-        let mut puzzlehash_bytes = [0u8; 32];
-        for i in 0..32 {
-            puzzlehash_bytes[i] = bytes.raw()[i];
-        }
-        Puzzlehash(puzzlehash_bytes)
-    }
-}
-
 #[derive(Debug, Clone)]
 pub struct WrapperBytes(pub Bytes);
+
+impl PartialEq for WrapperBytes {
+    fn eq(&self, other: &Self) -> bool {
+        self.to_hex() == other.to_hex()
+    }
+}
+impl Eq for WrapperBytes {
+    // fn eq(&self, other: &Self) -> bool {
+    //  self.to_hex() == other.to_hex()
+    // }
+}
 
 impl WrapperBytes {
     pub fn sha256_hash(&self) -> WrapperBytes {
@@ -87,8 +65,39 @@ impl From<Bytes32> for WrapperBytes {
     }
 }
 
-// Implement the necessary functions for Puzzlehash.
+impl Hash for WrapperBytes {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        // Delegate the hashing to the slice of bytes
+        self.to_hex().hash(state);
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct Puzzlehash([u8; 32]);
+
 impl Puzzlehash {
+    pub fn from_bytes(bytes: &[u8]) -> Self {
+        let mut puzzlehash_bytes = [0u8; 32];
+
+        for i in 0..32 {
+            puzzlehash_bytes[i] = bytes[i];
+        }
+        Puzzlehash(puzzlehash_bytes)
+    }
+    pub fn from_atom(program: Program) -> Self {
+        let mut puzzlehash_bytes = [0u8; 32];
+        let atom_bytes = program.as_vec().unwrap();
+        for i in 0..32 {
+            puzzlehash_bytes[i] = atom_bytes[i];
+        }
+        Puzzlehash(puzzlehash_bytes)
+    }
+    pub fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<Self, std::io::Error> {
+        let bytes = hex::decode(hex).unwrap();
+        let wrapped_bytes =
+            WrapperBytes(Bytes::new(Some(BytesFromType::Raw(bytes)))).as_puzzlehash();
+        Ok(wrapped_bytes)
+    }
     pub fn from_stream(_iterator: &mut std::slice::Iter<u8>) -> Puzzlehash {
         let mut puzzlehash_bytes = [0u8; 32];
         for i in 0..32 {
@@ -102,6 +111,17 @@ impl Puzzlehash {
     }
     pub fn to_bytes(&self) -> WrapperBytes {
         return WrapperBytes::from(self.0.to_vec());
+    }
+}
+
+// from WrapperBytes
+impl From<WrapperBytes> for Puzzlehash {
+    fn from(bytes: WrapperBytes) -> Self {
+        let mut puzzlehash_bytes = [0u8; 32];
+        for i in 0..32 {
+            puzzlehash_bytes[i] = bytes.raw()[i];
+        }
+        Puzzlehash(puzzlehash_bytes)
     }
 }
 

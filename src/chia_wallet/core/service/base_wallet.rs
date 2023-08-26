@@ -271,24 +271,39 @@ fn test_make_solution() {
     .tree_hash();
     let assert_coin_announcement = AssertCoinAnnouncementCondition::new(
         launcher_id.to_bytes(),
-        WrapperBytes::from(announcement_message),
+        WrapperBytes::from(announcement_message.clone()),
     );
+    let assert_puzzle =
+        AssertPuzzleAnnouncementConditionImp::new(WrapperBytes::from(announcement_message.clone()));
     let ph =
-        WrapperBytes::from_hex(&"e30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18c")
-            .unwrap()
-            .as_puzzlehash();
-    let coin_announcements = HashSet::new();
-    let puzzle_announcements = HashSet::new();
+        Puzzlehash::from_hex(&"e30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18c")
+            .unwrap();
+    let ph2 =
+        Puzzlehash::from_hex(&"e30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18a")
+            .unwrap();
+    let mut coin_announcements = HashSet::new();
+    coin_announcements.insert(ph.to_bytes());
+    coin_announcements.insert(ph.to_bytes());
+    if coin_announcements.len() != 1 {
+        panic!("coin_announcements should have only one element");
+    }
+    coin_announcements.insert(ph2.to_bytes());
+    if coin_announcements.len() != 2 {
+        panic!("coin_announcements should have only two element");
+    }
+    let mut puzzle_announcements = HashSet::new();
+    puzzle_announcements.insert(ph.to_bytes());
+    puzzle_announcements.insert(ph2.to_bytes());
+
     let primaries = vec![Payment::new(BigInt::from(100), ph, None)];
     let solution = BaseWallet::make_solution(
         primaries,
         vec![assert_coin_announcement],
-        vec![],
+        vec![assert_puzzle],
         coin_announcements,
         puzzle_announcements,
     );
-    assert_eq!(
-        "(() (q (63 0xe30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18c 100) (61 0xb334ae7173a5e65e0a380952707904ae22fd097e11d5101f2c1876b74f5ca33e)) ())",
-        solution.disassemble()
-    );
+    let equal_program = Program::from_source("(() (q (63 0xe30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18c 100) (60 0xe30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18c) (60 0xe30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18a) (61 0xb334ae7173a5e65e0a380952707904ae22fd097e11d5101f2c1876b74f5ca33e) (62 0xe30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18a) (62 0xe30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18c) (63 0x3659e109ac94549c9393f3bcdfd950cc63c4c90c838afe822f64ba3d9167de00)) ())");
+
+    assert_eq!(equal_program.to_source(), solution.to_source());
 }

@@ -16,7 +16,7 @@ use api::hex_to_bytes;
 use crate::{
     api::{
         bytes_to_hex, cmd_program_opc, cmd_program_opd, cmds_program_run, program_curry,
-        program_disassemble, program_uncurry,
+        program_uncurry,
     },
     chia_wallet::standart::puzzles::p2_delegated_puzzle_or_hidden_puzzle::get_puzzle_from_pk,
     program_utils::{program::Program, serialized_program::SerializedProgram},

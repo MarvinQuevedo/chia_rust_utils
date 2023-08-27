@@ -20,8 +20,8 @@ use yaml_rust::YamlEmitter;
 use crate::chia_wallet::cat::puzzles::create_cat_outer_puzzle::create_cat_puzzle;
 use crate::chia_wallet::standart::puzzles::p2_delegated_puzzle_or_hidden_puzzle::get_puzzle_from_pk;
 use crate::program_utils::call_tool::call_tool_with_return;
-use crate::program_utils::cldb::cldb_with_return;
-use crate::program_utils::cldb::to_yaml;
+/* use crate::program_utils::cldb::cldb_with_return;
+use crate::program_utils::cldb::to_yaml; */
 use crate::program_utils::curry_utils::curry;
 
 use crate::program_utils::program::Program;
@@ -267,7 +267,7 @@ pub fn cmd_program_opd(args: Vec<String>) -> Vec<String> {
         &mut allocator,
         "opd",
         "Disassemble a compiled clvm script from hex.",
-        Box::new(OpdConversion {}),
+        Box::new(OpdConversion { op_version: None }),
         args.as_slice(),
     );
     match call_result {
@@ -281,7 +281,7 @@ pub fn cmd_program_opd(args: Vec<String>) -> Vec<String> {
     }
 }
 
-pub fn cmd_program_cldb(args: Vec<String>) -> String {
+/* pub fn cmd_program_cldb(args: Vec<String>) -> String {
     let yamlette_string = |to_print: Vec<BTreeMap<String, String>>| {
         let mut result = String::new();
         let mut emitter = YamlEmitter::new(&mut result);
@@ -300,7 +300,7 @@ pub fn cmd_program_cldb(args: Vec<String>) -> String {
             format!("Error: {}", e)
         }
     }
-}
+} */
 
 pub fn program_tree_hash(ser_program_bytes: Vec<u8>) -> [u8; 32] {
     let program = SerializedProgram::from_bytes(&ser_program_bytes)
@@ -350,7 +350,7 @@ pub fn program_from_list(program_list: Vec<String>) -> Vec<u8> {
     actual.serialized.clone()
 }
 
-pub fn program_disassemble(ser_program_bytes: Vec<u8>) -> String {
+pub fn program_disassemble(ser_program_bytes: Vec<u8>, version: Option<usize>) -> String {
     let mut stream = Stream::new(Some(Bytes::new(Some(BytesFromType::Raw(
         ser_program_bytes,
     )))));
@@ -363,7 +363,7 @@ pub fn program_disassemble(ser_program_bytes: Vec<u8>) -> String {
     )
     .map_err(|e| e.1)
     .map(|sexp| {
-        let disassembled = disassemble(&mut allocator, sexp.1);
+        let disassembled = disassemble(&mut allocator, sexp.1, version);
         t(sexp.1, disassembled)
     })
     .unwrap();

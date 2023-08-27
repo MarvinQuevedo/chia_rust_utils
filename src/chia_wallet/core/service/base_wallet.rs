@@ -16,15 +16,16 @@ use crate::{
         payment::Payment,
     },
     program_utils::{
-        program::Program, serialize::node_to_bytes, serialized_program::SerializedProgram,
+        node::Node, program::Program, serialize::node_to_bytes,
+        serialized_program::SerializedProgram,
     },
 };
 use chia_bls::signature::Signature;
-use clvmr::{allocator::Allocator, node::Node};
+use clvmr::allocator::Allocator;
 use num_bigint::BigInt;
 use std::collections::HashMap;
 use std::collections::HashSet;
-struct BaseWallet {
+pub struct BaseWallet {
     network: BlockchainNetwork,
 }
 
@@ -72,7 +73,7 @@ impl BaseWallet {
             &Program::new(solution.to_bytes()),
         ) {
             Ok((cost, r)) => {
-                let node = Node::new(&allocator, r);
+                let node = Node::new(&mut allocator, r);
                 match node_to_bytes(&node) {
                     Ok(byte_data) => {
                         let serial_program = SerializedProgram::from_bytes(&byte_data);
@@ -305,5 +306,5 @@ fn test_make_solution() {
     );
     let equal_program = Program::from_source("(() (q (63 0xe30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18c 100) (60 0xe30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18c) (60 0xe30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18a) (61 0xb334ae7173a5e65e0a380952707904ae22fd097e11d5101f2c1876b74f5ca33e) (62 0xe30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18a) (62 0xe30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18c) (63 0x3659e109ac94549c9393f3bcdfd950cc63c4c90c838afe822f64ba3d9167de00)) ())");
 
-    assert_eq!(equal_program.to_source(), solution.to_source());
+    assert_eq!(equal_program.to_source(None), solution.to_source(None));
 }

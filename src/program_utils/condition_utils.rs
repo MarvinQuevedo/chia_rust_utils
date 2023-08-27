@@ -1,4 +1,4 @@
-use crate::blockchain::announcement::Announcement;
+/* use crate::blockchain::announcement::Announcement;
 use crate::blockchain::coin::Coin;
 use crate::blockchain::condition_opcode::ConditionOpcode;
 use crate::blockchain::condition_with_args::ConditionWithArgs;
@@ -232,3 +232,9 @@ pub fn conditions_for_solution(
 //     return ret
 // }
 //
+ */
+
+use crate::blockchain::utils::atom_to_int;
+use crate::blockchain::{coin::Coin, sized_bytes::Bytes32};
+use crate::chia_wallet::core::conditions::condition_opcode::{ConditionOpcode, ConditionWithArgs};
+use std::collections::HashMap;

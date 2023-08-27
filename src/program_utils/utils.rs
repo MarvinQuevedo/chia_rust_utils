@@ -3,12 +3,11 @@ use crate::blockchain::sized_bytes::Bytes32;
 use clvmr::allocator::SExp::Atom;
 use clvmr::allocator::SExp::Pair;
 use clvmr::allocator::{Allocator, NodePtr};
- 
+
 use sha2::{Digest, Sha256, Sha512};
 use std::collections::HashSet;
 use std::error::Error;
 
- 
 pub const INFINITE_COST: u64 = 0x7FFFFFFFFFFFFFFF;
 
 pub fn tree_hash(
@@ -17,7 +16,7 @@ pub fn tree_hash(
     precalculated: &HashSet<Bytes32>,
 ) -> Result<Bytes32, Box<dyn Error>> {
     match alloc.sexp(node_ptr) {
-        Atom(_buf) => {
+        Atom() => {
             let atom = alloc.atom(node_ptr);
             if precalculated.contains(&Vec::from(atom).into()) {
                 Ok(Vec::from(atom).into())

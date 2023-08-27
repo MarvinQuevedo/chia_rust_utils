@@ -1,4 +1,8 @@
+use clvm_tools_rs::classic::clvm::__type_compatibility__::Stream;
+use clvm_tools_rs::classic::clvm::serialize::sexp_to_stream;
+use clvm_tools_rs::classic::clvm::sexp::sexp_as_bin;
 use clvmr::reduction::EvalErr;
+use clvmr::serde::node_to_bytes as clvmr_node_to_bytes;
 use std::io::Cursor;
 use std::io::Read;
 use std::io::Seek;
@@ -6,7 +10,9 @@ use std::io::Write;
 use std::io::{Error, ErrorKind, SeekFrom};
 
 use clvmr::allocator::{Allocator, NodePtr, SExp};
-use clvmr::node::Node;
+
+use super::node::Node;
+use super::program::Program;
 
 const MAX_SINGLE_BYTE: u8 = 0x7f;
 const CONS_BOX_MARKER: u8 = 0xff;
@@ -47,38 +53,6 @@ fn encode_size(f: &mut dyn Write, size: u64) -> std::io::Result<()> {
         ])?;
     } else {
         return Err(Error::new(ErrorKind::InvalidData, "atom too big"));
-    }
-    Ok(())
-}
-
-pub fn node_to_stream(node: &Node, f: &mut dyn Write) -> std::io::Result<()> {
-    let mut values: Vec<NodePtr> = vec![node.node];
-    let a = node.allocator;
-    while !values.is_empty() {
-        let v = values.pop().unwrap();
-        let n = a.sexp(v);
-        match n {
-            SExp::Atom(atom_ptr) => {
-                let atom = a.buf(&atom_ptr);
-                let size = atom.len();
-                if size == 0 {
-                    f.write_all(&[0x80_u8])?;
-                } else {
-                    let atom0 = atom[0];
-                    if size == 1 && (atom0 <= MAX_SINGLE_BYTE) {
-                        f.write_all(&[atom0])?;
-                    } else {
-                        encode_size(f, size as u64)?;
-                        f.write_all(atom)?;
-                    }
-                }
-            }
-            SExp::Pair(left, right) => {
-                f.write_all(&[CONS_BOX_MARKER as u8])?;
-                values.push(right);
-                values.push(left);
-            }
-        }
     }
     Ok(())
 }
@@ -186,11 +160,8 @@ pub fn node_from_bytes(allocator: &mut Allocator, b: &[u8]) -> std::io::Result<N
 }
 
 pub fn node_to_bytes(node: &Node) -> std::io::Result<Vec<u8>> {
-    let mut buffer = Cursor::new(Vec::new());
-
-    node_to_stream(node, &mut buffer)?;
-    let vec = buffer.into_inner();
-    Ok(vec)
+    let vec = clvmr_node_to_bytes(node.allocator, node.node);
+    vec
 }
 
 pub fn serialized_length_from_bytes(b: &[u8]) -> std::io::Result<u64> {

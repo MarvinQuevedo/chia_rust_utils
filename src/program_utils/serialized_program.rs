@@ -1,11 +1,11 @@
 use crate::blockchain::sized_bytes::hex_to_bytes;
 use crate::program_utils::program::Program;
+use crate::program_utils::serialize::node_from_bytes;
 use chia::gen::flags::MEMPOOL_MODE;
 use clvmr::allocator::{Allocator, NodePtr};
 use clvmr::chia_dialect::ChiaDialect;
 use clvmr::cost::Cost;
 use clvmr::run_program::run_program;
-use crate::program_utils::serialize::node_from_bytes;
 use hex::encode;
 use serde::de::Visitor;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -74,9 +74,9 @@ impl SerializedProgram {
         let program = node_from_bytes(allocator, &self.buffer.as_slice())?;
         let args = node_from_bytes(allocator, args.serialized.as_slice())?;
         let dialect = ChiaDialect::new(flags);
-        match run_program(allocator, &dialect, program, args, max_cost, None) {
+        match run_program(allocator, &dialect, program, args, max_cost) {
             Ok(reduct) => Ok((reduct.0, reduct.1)),
-            Err(error) => Err(error.1.into(),),
+            Err(error) => Err(error.1.into()),
         }
     }
 }

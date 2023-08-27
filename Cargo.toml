@@ -5,8 +5,7 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
-anyhow = "=1.0.65"
+[dependencies] 
 flutter_rust_bridge = "1.68.0"
 num = "0.4"
 image = "0.24.3"
@@ -15,9 +14,9 @@ sha2 = "=0.10.2"
 tiny-bip39 = "=1.0.0"
 chia = { path = "../chia_rs", version = ">=0.2.4" }
 chia-bls = { path = "../chia_rs/chia-bls", version = ">=0.2.4" }
-clvm-utils = "0.2.4"
-clvmr = "0.1.24"
-clvm_tools_rs = { git = "https://github.com/MarvinQuevedo/clvm_tools_rs.git", rev ='04cb88041132cbd805ea4e3ee9aa47014bfb2f4f' }
+clvm-utils = { path = "../chia_rs/clvm-utils" }
+clvmr = { version = "0.2.6", features = ["pre-eval"] }
+clvm_tools_rs = { git = "https://github.com/MarvinQuevedo/clvm_tools_rs.git", rev ='1b1313c308b3d6a124332027447062141a2ad60d' }
 serde = { version = "1.0", features = ["derive"] }
 lazy_static = "1.4.0"
 serde_derive = "1.0"

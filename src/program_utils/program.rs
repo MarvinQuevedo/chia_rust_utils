@@ -14,7 +14,7 @@ use clvm_tools_rs::classic::clvm_tools::sha256tree::sha256tree;
 use clvmr::allocator::SExp::{Atom, Pair};
 use clvmr::allocator::{Allocator, SExp};
 use clvmr::cost::Cost;
-use clvmr::node::Node;
+
 use hex::encode;
 use num_bigint::BigInt;
 use serde::ser::StdError;
@@ -25,6 +25,7 @@ use std::hash::Hash;
 use std::hash::Hasher;
 
 use super::curry_utils::assemble;
+use super::node::Node;
 
 /* pub fn program_from_list(program_list: Vec<Program>) -> Program {
     let mut actual = Program::null();
@@ -252,12 +253,12 @@ impl Program {
         let mut cur_node = self;
         loop {
             match cur_node.to_sexp() {
-                Atom(_) => break,
+                Atom() => break,
                 Pair(_, _) => {
                     let pair = cur_node.as_pair().unwrap();
                     cur_node = pair.1;
                     match pair.0.to_sexp() {
-                        Atom(_) => {
+                        Atom() => {
                             rtn.insert(pair.0.as_atom().unwrap(), Program::new(Vec::new()));
                         }
                         Pair(_, _) => {
@@ -289,13 +290,13 @@ impl Program {
 
     pub fn as_atom(&self) -> Option<Program> {
         match self.to_sexp() {
-            Atom(_) => Some(Program::new(self.alloc.atom(self.nodeptr).to_vec())),
+            Atom() => Some(Program::new(self.alloc.atom(self.nodeptr).to_vec())),
             _ => None,
         }
     }
     pub fn as_vec(&self) -> Option<Vec<u8>> {
         match self.to_sexp() {
-            Atom(_) => Some(self.alloc.atom(self.nodeptr).to_vec()),
+            Atom() => Some(self.alloc.atom(self.nodeptr).to_vec()),
             _ => None,
         }
     }
@@ -371,8 +372,8 @@ impl Program {
         }
     }
     pub fn run_with_cmd(&self, args: Program) -> RunOutput {
-        let program_source = self.disassemble();
-        let args_source = args.disassemble();
+        let program_source = self.disassemble(None);
+        let args_source = args.disassemble(None);
         let cmd_args = ["-c".to_string(), program_source, args_source];
         let output = cmds_program_brun(cmd_args.to_vec());
         let lines = output.split("\n").collect::<Vec<&str>>();
@@ -418,7 +419,7 @@ impl Program {
         }
     }
 
-    pub fn disassemble(&self) -> String {
+    pub fn disassemble(&self, version: Option<usize>) -> String {
         let mut stream = Stream::new(Some(Bytes::new(Some(BytesFromType::Raw(
             self.serialized.clone(),
         )))));
@@ -431,15 +432,15 @@ impl Program {
         )
         .map_err(|e| e.1)
         .map(|sexp| {
-            let disassembled = disassemble(&mut allocator, sexp.1);
+            let disassembled = disassemble(&mut allocator, sexp.1, version);
             t(sexp.1, disassembled)
         })
         .unwrap();
 
         result.rest().to_string()
     }
-    pub fn to_source(&self) -> String {
-        self.disassemble()
+    pub fn to_source(&self, version: Option<usize>) -> String {
+        self.disassemble(version)
     }
 }
 

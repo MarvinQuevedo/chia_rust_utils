@@ -28,39 +28,39 @@ impl ConditionOpcode {
 
     // the conditions below require bls12-381 signatures
 
-    const AGG_SIG_UNSAFE: ConditionOpcode = ConditionOpcode::from_int(49);
-    const AGG_SIG_ME: ConditionOpcode = ConditionOpcode::from_int(50);
+    pub const AGG_SIG_UNSAFE: ConditionOpcode = ConditionOpcode::from_int(49);
+    pub const AGG_SIG_ME: ConditionOpcode = ConditionOpcode::from_int(50);
 
     // the conditions below reserve coin amounts and have to be accounted for in output totals
 
-    const CREATE_COIN: ConditionOpcode = ConditionOpcode::from_int(51);
-    const RESERVE_FEE: ConditionOpcode = ConditionOpcode::from_int(52);
+    pub const CREATE_COIN: ConditionOpcode = ConditionOpcode::from_int(51);
+    pub const RESERVE_FEE: ConditionOpcode = ConditionOpcode::from_int(52);
 
     // the conditions below deal with announcements, for inter-coin communication
 
-    const CREATE_COIN_ANNOUNCEMENT: ConditionOpcode = ConditionOpcode::from_int(60);
-    const ASSERT_COIN_ANNOUNCEMENT: ConditionOpcode = ConditionOpcode::from_int(61);
-    const CREATE_PUZZLE_ANNOUNCEMENT: ConditionOpcode = ConditionOpcode::from_int(62);
-    const ASSERT_PUZZLE_ANNOUNCEMENT: ConditionOpcode = ConditionOpcode::from_int(63);
+    pub const CREATE_COIN_ANNOUNCEMENT: ConditionOpcode = ConditionOpcode::from_int(60);
+    pub const ASSERT_COIN_ANNOUNCEMENT: ConditionOpcode = ConditionOpcode::from_int(61);
+    pub const CREATE_PUZZLE_ANNOUNCEMENT: ConditionOpcode = ConditionOpcode::from_int(62);
+    pub const ASSERT_PUZZLE_ANNOUNCEMENT: ConditionOpcode = ConditionOpcode::from_int(63);
 
     // the conditions below let coins inquire about themselves
 
-    const ASSERT_MY_COIN_ID: ConditionOpcode = ConditionOpcode::from_int(70);
-    const ASSERT_MY_PARENT_ID: ConditionOpcode = ConditionOpcode::from_int(71);
-    const ASSERT_MY_PUZZLEHASH: ConditionOpcode = ConditionOpcode::from_int(72);
-    const ASSERT_MY_AMOUNT: ConditionOpcode = ConditionOpcode::from_int(73);
+    pub const ASSERT_MY_COIN_ID: ConditionOpcode = ConditionOpcode::from_int(70);
+    pub const ASSERT_MY_PARENT_ID: ConditionOpcode = ConditionOpcode::from_int(71);
+    pub const ASSERT_MY_PUZZLEHASH: ConditionOpcode = ConditionOpcode::from_int(72);
+    pub const ASSERT_MY_AMOUNT: ConditionOpcode = ConditionOpcode::from_int(73);
 
     // the conditions below ensure that we're "far enough" in the future
 
     // wall-clock time
-    const ASSERT_SECONDS_RELATIVE: ConditionOpcode = ConditionOpcode::from_int(80);
-    const ASSERT_SECONDS_ABSOLUTE: ConditionOpcode = ConditionOpcode::from_int(81);
+    pub const ASSERT_SECONDS_RELATIVE: ConditionOpcode = ConditionOpcode::from_int(80);
+    pub const ASSERT_SECONDS_ABSOLUTE: ConditionOpcode = ConditionOpcode::from_int(81);
 
     // block index
-    const ASSERT_HEIGHT_RELATIVE: ConditionOpcode = ConditionOpcode::from_int(82);
-    const ASSERT_HEIGHT_ABSOLUTE: ConditionOpcode = ConditionOpcode::from_int(83);
+    pub const ASSERT_HEIGHT_RELATIVE: ConditionOpcode = ConditionOpcode::from_int(82);
+    pub const ASSERT_HEIGHT_ABSOLUTE: ConditionOpcode = ConditionOpcode::from_int(83);
 
-    const fn from_int(value: u8) -> Self {
+    pub const fn from_int(value: u8) -> Self {
         ConditionOpcode(value)
     }
 

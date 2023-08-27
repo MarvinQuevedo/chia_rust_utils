@@ -4,6 +4,7 @@ pub mod cldb;
 pub mod condition_utils;
 pub mod curry_utils;
 
+pub mod node;
 pub mod program;
 pub mod serialize;
 pub mod serialized_program;

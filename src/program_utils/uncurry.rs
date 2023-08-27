@@ -1,5 +1,6 @@
 use clvmr::allocator::{Allocator, NodePtr};
-use clvmr::node::Node;
+
+use super::node::Node;
 
 fn unwrap3(node: Node) -> Option<(Node, Node, Node)> {
     let mut i = node;

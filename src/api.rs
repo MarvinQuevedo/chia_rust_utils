@@ -153,14 +153,14 @@ pub fn hex_to_bytes(hex: String) -> Vec<u8> {
     }
     bytes
 }
-pub fn hexstr_to_bytes(hex: &str) -> Vec<u8> {
+/* pub fn hexstr_to_bytes(hex: str) -> Vec<u8> {
     let mut bytes = Vec::new();
     for i in 0..hex.len() / 2 {
         let byte = u8::from_str_radix(&hex[i * 2..i * 2 + 2], 16).unwrap();
         bytes.push(byte);
     }
     bytes
-}
+} */
 
 pub fn bytes_to_sha256(bytes: Vec<u8>) -> Vec<u8> {
     let mut hasher = Sha256::new();

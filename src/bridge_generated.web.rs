@@ -136,11 +136,6 @@ pub fn wire_cmd_program_opd(port_: MessagePort, args: JsValue) {
 }
 
 #[wasm_bindgen]
-pub fn wire_cmd_program_cldb(port_: MessagePort, args: JsValue) {
-    wire_cmd_program_cldb_impl(port_, args)
-}
-
-#[wasm_bindgen]
 pub fn wire_program_tree_hash(port_: MessagePort, ser_program_bytes: Box<[u8]>) {
     wire_program_tree_hash_impl(port_, ser_program_bytes)
 }
@@ -161,8 +156,12 @@ pub fn wire_program_from_list(port_: MessagePort, program_list: JsValue) {
 }
 
 #[wasm_bindgen]
-pub fn wire_program_disassemble(port_: MessagePort, ser_program_bytes: Box<[u8]>) {
-    wire_program_disassemble_impl(port_, ser_program_bytes)
+pub fn wire_program_disassemble(
+    port_: MessagePort,
+    ser_program_bytes: Box<[u8]>,
+    version: JsValue,
+) {
+    wire_program_disassemble_impl(port_, ser_program_bytes, version)
 }
 
 #[wasm_bindgen]
@@ -231,6 +230,11 @@ impl Wire2Api<Vec<u8>> for Box<[u8]> {
 impl Wire2Api<String> for JsValue {
     fn wire2api(self) -> String {
         self.as_string().expect("non-UTF-8 string, or not a string")
+    }
+}
+impl Wire2Api<Option<usize>> for JsValue {
+    fn wire2api(self) -> Option<usize> {
+        (!self.is_undefined() && !self.is_null()).then(|| self.wire2api())
     }
 }
 impl Wire2Api<u32> for JsValue {

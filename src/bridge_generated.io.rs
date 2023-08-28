@@ -175,11 +175,6 @@ pub extern "C" fn wire_cmd_program_opd(port_: i64, args: *mut wire_StringList) {
 }
 
 #[no_mangle]
-pub extern "C" fn wire_cmd_program_cldb(port_: i64, args: *mut wire_StringList) {
-    wire_cmd_program_cldb_impl(port_, args)
-}
-
-#[no_mangle]
 pub extern "C" fn wire_program_tree_hash(port_: i64, ser_program_bytes: *mut wire_uint_8_list) {
     wire_program_tree_hash_impl(port_, ser_program_bytes)
 }
@@ -204,8 +199,12 @@ pub extern "C" fn wire_program_from_list(port_: i64, program_list: *mut wire_Str
 }
 
 #[no_mangle]
-pub extern "C" fn wire_program_disassemble(port_: i64, ser_program_bytes: *mut wire_uint_8_list) {
-    wire_program_disassemble_impl(port_, ser_program_bytes)
+pub extern "C" fn wire_program_disassemble(
+    port_: i64,
+    ser_program_bytes: *mut wire_uint_8_list,
+    version: *mut usize,
+) {
+    wire_program_disassemble_impl(port_, ser_program_bytes, version)
 }
 
 #[no_mangle]
@@ -256,6 +255,11 @@ pub extern "C" fn new_StringList_0(len: i32) -> *mut wire_StringList {
 }
 
 #[no_mangle]
+pub extern "C" fn new_box_autoadd_usize_0(value: usize) -> *mut usize {
+    support::new_leak_box_ptr(value)
+}
+
+#[no_mangle]
 pub extern "C" fn new_uint_32_list_0(len: i32) -> *mut wire_uint_32_list {
     let ans = wire_uint_32_list {
         ptr: support::new_leak_vec_ptr(Default::default(), len),
@@ -290,6 +294,11 @@ impl Wire2Api<Vec<String>> for *mut wire_StringList {
             support::vec_from_leak_ptr(wrap.ptr, wrap.len)
         };
         vec.into_iter().map(Wire2Api::wire2api).collect()
+    }
+}
+impl Wire2Api<usize> for *mut usize {
+    fn wire2api(self) -> usize {
+        unsafe { *support::box_from_leak_ptr(self) }
     }
 }
 

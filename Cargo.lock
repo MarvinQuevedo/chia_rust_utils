@@ -1473,6 +1473,7 @@ dependencies = [
  "byteorder",
  "chia",
  "chia-bls",
+ "chia-protocol",
  "clvm-utils",
  "clvm_tools_rs",
  "clvmr 0.2.7",

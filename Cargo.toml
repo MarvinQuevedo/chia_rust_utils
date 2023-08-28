@@ -37,6 +37,8 @@ byteorder = "1.4.3"
 name = "rust_bls_flutter"
 crate-type = ["cdylib", "staticlib"]
 
+[target.'cfg(target_arch = "wasm32")']
+rustflags = ["-C", "link-arg=-s", "-C", "link-arg=--no-entry"]
 
 [[bin]]
 name = "test"

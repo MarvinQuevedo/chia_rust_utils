@@ -1,15 +1,15 @@
 use std::collections::HashMap;
 
-use clvm_tools_rs::classic::clvm::__type_compatibility__::Bytes;
+use clvm_tools_rs::classic::clvm::__type_compatibility__::Bytes as CvlmBytes;
 
 use super::{
-    bytes::{Puzzlehash, WrapperBytes},
+    bytes::{Bytes, Puzzlehash},
     serialization::serialize_hex_item,
 };
 
 #[derive(Debug, Clone)]
 pub struct WalletPuzzlehash {
-    pub bytes_list: WrapperBytes,
+    pub bytes_list: Bytes,
     pub derivation_index: i32,
 }
 
@@ -23,7 +23,7 @@ impl PartialEq for WalletPuzzlehash {
 impl Eq for WalletPuzzlehash {}
 
 impl WalletPuzzlehash {
-    pub fn new(bytes_list: WrapperBytes, derivation_index: i32) -> Self {
+    pub fn new(bytes_list: Bytes, derivation_index: i32) -> Self {
         WalletPuzzlehash {
             bytes_list,
             derivation_index,
@@ -42,7 +42,7 @@ impl WalletPuzzlehash {
         let puzzlehash_hex = json.get("puzzlehash").unwrap().as_str().unwrap();
         let derivation_index = json.get("derivation_index").unwrap().as_i64().unwrap() as i32;
         let bytes_list = serialize_hex_item(puzzlehash_hex);
-        let wrapper_bytes = WrapperBytes::from(bytes_list);
+        let wrapper_bytes = Bytes::from(bytes_list);
         WalletPuzzlehash {
             bytes_list: wrapper_bytes,
             derivation_index,

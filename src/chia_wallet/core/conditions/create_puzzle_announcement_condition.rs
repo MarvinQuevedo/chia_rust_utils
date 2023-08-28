@@ -1,11 +1,11 @@
-use crate::chia_wallet::core::bytes::WrapperBytes;
+use crate::chia_wallet::core::bytes::Bytes;
 use crate::chia_wallet::core::conditions::conditions::Condition;
 use crate::program_utils::program::Program;
 
 use super::conditions::check_is_this_condition_with_parts_len;
 
 pub struct CreatePuzzleAnnouncementCondition {
-    message: WrapperBytes,
+    message: Bytes,
 }
 impl Condition for CreatePuzzleAnnouncementCondition {
     fn program(&self) -> Program {
@@ -19,7 +19,7 @@ impl Condition for CreatePuzzleAnnouncementCondition {
 impl CreatePuzzleAnnouncementCondition {
     const CONDITION_CODE: u32 = 62;
 
-    pub fn new(message: WrapperBytes) -> Self {
+    pub fn new(message: Bytes) -> Self {
         CreatePuzzleAnnouncementCondition { message }
     }
 

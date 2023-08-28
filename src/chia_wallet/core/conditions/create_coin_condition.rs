@@ -5,11 +5,11 @@ use super::conditions::check_is_this_condition_with_parts_len;
 use crate::chia_wallet::core::bytes::Puzzlehash;
 use crate::chia_wallet::core::conditions::conditions::Condition;
 use crate::chia_wallet::core::payment::Payment;
-use crate::{chia_wallet::core::bytes::WrapperBytes, program_utils::program::Program};
+use crate::{chia_wallet::core::bytes::Bytes, program_utils::program::Program};
 pub struct CreateCoinCondition {
     destination_puzzlehash: Puzzlehash,
     amount: BigInt,
-    memos: Option<Vec<WrapperBytes>>,
+    memos: Option<Vec<Bytes>>,
 }
 
 impl Condition for CreateCoinCondition {
@@ -37,7 +37,7 @@ impl CreateCoinCondition {
     pub fn new(
         destination_puzzlehash: Puzzlehash,
         amount: BigInt,
-        memos: Option<Vec<WrapperBytes>>,
+        memos: Option<Vec<Bytes>>,
     ) -> Self {
         CreateCoinCondition {
             destination_puzzlehash,
@@ -52,15 +52,14 @@ impl CreateCoinCondition {
             return Err(InvalidConditionCastException);
         }
 
-        let destination_puzzlehash =
-            Puzzlehash::from(WrapperBytes::from_atom(program_list[1].clone()));
+        let destination_puzzlehash = Puzzlehash::from(Bytes::from_atom(program_list[1].clone()));
         let amount = program_list[2].as_int().unwrap();
         let memos = if program_list.len() > 3 {
             Some(
                 program_list[3]
                     .to_list()
                     .into_iter()
-                    .map(|memo| WrapperBytes::from_atom(memo))
+                    .map(|memo| Bytes::from_atom(memo))
                     .collect(),
             )
         } else {

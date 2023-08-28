@@ -1,6 +1,6 @@
 use chia_bls::public_key::PublicKey;
 
-use crate::{chia_wallet::core::bytes::WrapperBytes, program_utils::program::Program};
+use crate::{chia_wallet::core::bytes::Bytes, program_utils::program::Program};
 
 use super::{
     assert_coin_id_condition::InvalidConditionCastException,
@@ -9,13 +9,13 @@ use super::{
 
 pub struct AggSigMeCondition {
     public_key: PublicKey,
-    message: WrapperBytes,
+    message: Bytes,
 }
 
 impl AggSigMeCondition {
     const CONDITION_CODE: u32 = 50;
 
-    pub fn new(public_key: PublicKey, message: WrapperBytes) -> Self {
+    pub fn new(public_key: PublicKey, message: Bytes) -> Self {
         AggSigMeCondition {
             public_key,
             message,
@@ -30,7 +30,7 @@ impl AggSigMeCondition {
         let public_key_bytes = program_list[1].as_vec().unwrap();
         let formated_bytes: [u8; 48] = public_key_bytes[..48].try_into().unwrap();
         let public_key = PublicKey::from_bytes(&formated_bytes).unwrap();
-        let message = WrapperBytes::from_atom(program_list[2].clone());
+        let message = Bytes::from_atom(program_list[2].clone());
         Ok(AggSigMeCondition {
             public_key,
             message,

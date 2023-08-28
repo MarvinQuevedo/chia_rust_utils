@@ -3,21 +3,21 @@ use num_bigint::BigInt;
 use crate::program_utils::program::Program;
 
 use super::{
-    bytes::{Puzzlehash, WrapperBytes},
+    bytes::{Bytes, Puzzlehash},
     conditions::create_coin_condition::CreateCoinCondition,
 };
 
 pub struct Payment {
     amount: BigInt,
     destination_puzzlehash: Puzzlehash,
-    memos: Option<Vec<WrapperBytes>>,
+    memos: Option<Vec<Bytes>>,
 }
 
 impl Payment {
     pub fn new(
         amount: BigInt,
         destination_puzzlehash: Puzzlehash,
-        memos: Option<Vec<WrapperBytes>>,
+        memos: Option<Vec<Bytes>>,
     ) -> Self {
         Payment {
             amount,
@@ -52,7 +52,7 @@ impl Payment {
                 .as_atom_list()
                 .iter()
                 .cloned()
-                .map(WrapperBytes::from)
+                .map(Bytes::from)
                 .collect()
         });
 

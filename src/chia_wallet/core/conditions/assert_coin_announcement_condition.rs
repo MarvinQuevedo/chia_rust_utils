@@ -1,12 +1,12 @@
 use crate::chia_wallet::core::conditions::conditions::Condition;
-use crate::{chia_wallet::core::bytes::WrapperBytes, program_utils::program::Program};
+use crate::{chia_wallet::core::bytes::Bytes, program_utils::program::Program};
 
 use super::conditions::check_is_this_condition;
 
 pub struct AssertCoinAnnouncementCondition {
-    coin_id: WrapperBytes,
-    message: WrapperBytes,
-    morph_bytes: Option<WrapperBytes>,
+    coin_id: Bytes,
+    message: Bytes,
+    morph_bytes: Option<Bytes>,
 }
 
 impl Condition for AssertCoinAnnouncementCondition {
@@ -23,7 +23,7 @@ impl Condition for AssertCoinAnnouncementCondition {
 
 impl AssertCoinAnnouncementCondition {
     const CONDITION_CODE: u32 = 61;
-    pub fn new(coin_id: WrapperBytes, message: WrapperBytes) -> Self {
+    pub fn new(coin_id: Bytes, message: Bytes) -> Self {
         AssertCoinAnnouncementCondition {
             coin_id,
             message,
@@ -31,15 +31,14 @@ impl AssertCoinAnnouncementCondition {
         }
     }
 
-    pub fn announcement_id(&self) -> WrapperBytes {
+    pub fn announcement_id(&self) -> Bytes {
         if let Some(morph_bytes) = &self.morph_bytes {
             let prefixed_message =
-                WrapperBytes::from([morph_bytes.raw(), self.message.raw()].concat()).sha256_hash();
-            return WrapperBytes::from([self.coin_id.raw(), prefixed_message.raw()].concat())
+                Bytes::from([morph_bytes.raw(), self.message.raw()].concat()).sha256_hash();
+            return Bytes::from([self.coin_id.raw(), prefixed_message.raw()].concat())
                 .sha256_hash();
         } else {
-            return WrapperBytes::from([self.coin_id.raw(), self.message.raw()].concat())
-                .sha256_hash();
+            return Bytes::from([self.coin_id.raw(), self.message.raw()].concat()).sha256_hash();
         }
     }
 
@@ -64,12 +63,12 @@ impl AssertCoinAnnouncementCondition {
     }
     pub fn from_program_list(mut program: Program) -> Self {
         let program_list = program.to_list();
-        let coin_id = WrapperBytes::from_atom(program_list[0].clone());
-        let message = WrapperBytes::from_atom(program_list[1].clone());
+        let coin_id = Bytes::from_atom(program_list[0].clone());
+        let message = Bytes::from_atom(program_list[1].clone());
         let morph_bytes = if program_list[2].is_null() {
             None
         } else {
-            Some(WrapperBytes::from_atom(program_list[2].clone()))
+            Some(Bytes::from_atom(program_list[2].clone()))
         };
         AssertCoinAnnouncementCondition {
             coin_id,

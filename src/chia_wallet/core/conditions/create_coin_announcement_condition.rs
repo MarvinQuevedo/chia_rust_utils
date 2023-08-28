@@ -1,9 +1,9 @@
 use super::assert_coin_id_condition::InvalidConditionCastException;
 use super::conditions::check_is_this_condition;
 use crate::chia_wallet::core::conditions::conditions::Condition;
-use crate::{chia_wallet::core::bytes::WrapperBytes, program_utils::program::Program};
+use crate::{chia_wallet::core::bytes::Bytes, program_utils::program::Program};
 pub struct CreateCoinAnnouncementCondition {
-    announcement_hash: WrapperBytes,
+    announcement_hash: Bytes,
 }
 
 impl Condition for CreateCoinAnnouncementCondition {
@@ -19,7 +19,7 @@ impl Condition for CreateCoinAnnouncementCondition {
 impl CreateCoinAnnouncementCondition {
     const CONDITION_CODE: u32 = 60;
 
-    pub fn new(announcement_hash: WrapperBytes) -> Self {
+    pub fn new(announcement_hash: Bytes) -> Self {
         CreateCoinAnnouncementCondition { announcement_hash }
     }
 
@@ -28,7 +28,7 @@ impl CreateCoinAnnouncementCondition {
         if !Self::is_this_condition(&program) {
             return Err(InvalidConditionCastException);
         }
-        let announcement_hash = WrapperBytes::from_atom(program_list[1].clone());
+        let announcement_hash = Bytes::from_atom(program_list[1].clone());
         Ok(CreateCoinAnnouncementCondition { announcement_hash })
     }
 

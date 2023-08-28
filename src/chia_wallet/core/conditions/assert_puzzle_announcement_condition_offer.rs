@@ -1,11 +1,11 @@
 use super::assert_puzzle_announcement_condition::{
     AssertPuzzleAnnouncementCondition, AssertPuzzleAnnouncementConditionImp,
 };
-use crate::{chia_wallet::core::bytes::WrapperBytes, program_utils::program::Program};
+use crate::{chia_wallet::core::bytes::Bytes, program_utils::program::Program};
 
 pub struct AssertPuzzleAnnouncementConditionOffer {
-    settlement_ph: WrapperBytes,
-    message: WrapperBytes,
+    settlement_ph: Bytes,
+    message: Bytes,
 }
 
 impl AssertPuzzleAnnouncementCondition for AssertPuzzleAnnouncementConditionOffer {
@@ -15,9 +15,9 @@ impl AssertPuzzleAnnouncementCondition for AssertPuzzleAnnouncementConditionOffe
         }
     }
 
-    fn get_announcement_hash(&self) -> WrapperBytes {
+    fn get_announcement_hash(&self) -> Bytes {
         let concat_values = [self.settlement_ph.raw(), self.message.raw()].concat();
-        WrapperBytes::from(concat_values).sha256_hash()
+        Bytes::from(concat_values).sha256_hash()
     }
 }
 impl AssertPuzzleAnnouncementConditionOffer {
@@ -30,8 +30,8 @@ impl AssertPuzzleAnnouncementConditionOffer {
     pub fn from_program_list(program: Program) -> Self {
         let list = program.clone().to_list();
         AssertPuzzleAnnouncementConditionOffer {
-            settlement_ph: WrapperBytes::from_atom(list[0].clone()),
-            message: WrapperBytes::from_atom(list[1].clone()),
+            settlement_ph: Bytes::from_atom(list[0].clone()),
+            message: Bytes::from_atom(list[1].clone()),
         }
     }
 }

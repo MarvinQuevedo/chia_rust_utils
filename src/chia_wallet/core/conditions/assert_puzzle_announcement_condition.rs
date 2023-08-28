@@ -1,14 +1,14 @@
 use super::assert_coin_id_condition::InvalidConditionCastException;
 use super::conditions::check_is_this_condition;
 use crate::chia_wallet::core::conditions::conditions::Condition;
-use crate::{chia_wallet::core::bytes::WrapperBytes, program_utils::program::Program};
+use crate::{chia_wallet::core::bytes::Bytes, program_utils::program::Program};
 
 pub trait AssertPuzzleAnnouncementCondition {
-    fn get_announcement_hash(&self) -> WrapperBytes;
+    fn get_announcement_hash(&self) -> Bytes;
     fn to_assert_puzzle_announcement_condition(&self) -> AssertPuzzleAnnouncementConditionImp;
 }
 pub struct AssertPuzzleAnnouncementConditionImp {
-    pub announcement_hash: WrapperBytes,
+    pub announcement_hash: Bytes,
 }
 impl AssertPuzzleAnnouncementCondition for AssertPuzzleAnnouncementConditionImp {
     fn to_assert_puzzle_announcement_condition(&self) -> AssertPuzzleAnnouncementConditionImp {
@@ -17,7 +17,7 @@ impl AssertPuzzleAnnouncementCondition for AssertPuzzleAnnouncementConditionImp 
         }
     }
 
-    fn get_announcement_hash(&self) -> WrapperBytes {
+    fn get_announcement_hash(&self) -> Bytes {
         self.announcement_hash.clone()
     }
 }
@@ -35,7 +35,7 @@ impl Condition for AssertPuzzleAnnouncementConditionImp {
 impl AssertPuzzleAnnouncementConditionImp {
     const CONDITION_CODE: u32 = 63;
 
-    pub fn new(announcement_hash: WrapperBytes) -> Self {
+    pub fn new(announcement_hash: Bytes) -> Self {
         AssertPuzzleAnnouncementConditionImp { announcement_hash }
     }
 
@@ -44,7 +44,7 @@ impl AssertPuzzleAnnouncementConditionImp {
         if !Self::is_this_condition(&program) {
             return Err(InvalidConditionCastException);
         }
-        let announcement_hash = WrapperBytes::from_atom(program_list[1].clone());
+        let announcement_hash = Bytes::from_atom(program_list[1].clone());
         Ok(AssertPuzzleAnnouncementConditionImp { announcement_hash })
     }
 

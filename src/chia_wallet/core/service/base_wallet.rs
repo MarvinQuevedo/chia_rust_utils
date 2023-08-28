@@ -1,8 +1,9 @@
 use crate::{
-    blockchain::{coin::Coin, coin_spend::CoinSpend},
+    blockchain::coin_spend::CoinSpend,
     chia_wallet::core::{
         blockchain_network::BlockchainNetwork,
-        bytes::{Puzzlehash, WrapperBytes},
+        blockchain_wrappers::coin::Coin,
+        bytes::{Bytes, Puzzlehash},
         conditions::condition_opcode::ConditionOpcode,
         conditions::{agg_sig_me_condition::AggSigMeCondition, conditions::Condition},
         conditions::{
@@ -21,10 +22,12 @@ use crate::{
     },
 };
 use chia_bls::signature::Signature;
+
 use clvmr::allocator::Allocator;
 use num_bigint::BigInt;
 use std::collections::HashMap;
 use std::collections::HashSet;
+
 pub struct BaseWallet {
     network: BlockchainNetwork,
 }
@@ -34,7 +37,7 @@ impl BaseWallet {
         result: Program,
         coin: Coin,
         network: BlockchainNetwork,
-    ) -> WrapperBytes {
+    ) -> Bytes {
         let all_items = result.clone().to_list();
 
         let agg_sig_me_condition =
@@ -49,8 +52,8 @@ impl BaseWallet {
             .as_vec()
             .unwrap();
 
-        let id = coin.name().bytes;
-        let extra_data = WrapperBytes::from_hex(&network.agg_sig_me_extra_data)
+        let id = coin.name().raw();
+        let extra_data = Bytes::from_hex(&network.agg_sig_me_extra_data)
             .unwrap()
             .raw();
         let mut message = Vec::new();
@@ -59,7 +62,7 @@ impl BaseWallet {
         message.extend_from_slice(&id);
         message.extend_from_slice(&extra_data);
 
-        WrapperBytes::from(message)
+        Bytes::from(message)
     }
     pub fn conditions_for_solution(
         puzzle_reveal: SerializedProgram,
@@ -124,7 +127,7 @@ impl BaseWallet {
         let mut id_set: HashSet<String> = HashSet::new();
 
         for coin in coins {
-            let coin_id_hex = hex::encode(&coin.name().bytes);
+            let coin_id_hex = hex::encode(&coin.name().raw());
             if id_set.contains(&coin_id_hex) {
                 return Err(DuplicateCoinException {
                     coin_id_hex: coin_id_hex.clone(),
@@ -201,8 +204,8 @@ impl BaseWallet {
         primaries: Vec<Payment>,
         coin_announcements_to_assert: Vec<AssertCoinAnnouncementCondition>,
         puzzle_announcements_to_assert: Vec<AssertPuzzleAnnouncementConditionImp>,
-        coin_announcements: HashSet<WrapperBytes>,
-        puzzle_announcements: HashSet<WrapperBytes>,
+        coin_announcements: HashSet<Bytes>,
+        puzzle_announcements: HashSet<Bytes>,
     ) -> Program {
         let mut conditions = Vec::new();
         if !primaries.is_empty() {
@@ -260,7 +263,7 @@ impl CoinSpendAndSignature {
 #[test]
 fn test_make_solution() {
     let launcher_id =
-        WrapperBytes::from_hex("c8109361adf2cd32c07587312052ddbc8bf61eb4644fd6351e1cf1f814f272fb")
+        Bytes::from_hex("c8109361adf2cd32c07587312052ddbc8bf61eb4644fd6351e1cf1f814f272fb")
             .unwrap()
             .as_puzzlehash();
     let eve_full_puz = Program::from_source("(a (q #a 4 (c 2 (c 5 (c 7 0)))) (c (q (c (q . 2) (c (c (q . 1) 5) (c (a 6 (c 2 (c 11 (q 1)))) 0))) #a (i 5 (q 4 (q . 4) (c (c (q . 1) 9) (c (a 6 (c 2 (c 13 (c 11 0)))) 0))) (q . 11)) 1) 1))");
@@ -272,10 +275,10 @@ fn test_make_solution() {
     .tree_hash();
     let assert_coin_announcement = AssertCoinAnnouncementCondition::new(
         launcher_id.to_bytes(),
-        WrapperBytes::from(announcement_message.clone()),
+        Bytes::from(announcement_message.clone()),
     );
     let assert_puzzle =
-        AssertPuzzleAnnouncementConditionImp::new(WrapperBytes::from(announcement_message.clone()));
+        AssertPuzzleAnnouncementConditionImp::new(Bytes::from(announcement_message.clone()));
     let ph =
         Puzzlehash::from_hex(&"e30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18c")
             .unwrap();

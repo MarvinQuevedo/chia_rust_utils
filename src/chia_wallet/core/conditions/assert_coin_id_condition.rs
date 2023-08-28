@@ -1,8 +1,8 @@
 use super::conditions::check_is_this_condition;
 use crate::chia_wallet::core::conditions::conditions::Condition;
-use crate::{chia_wallet::core::bytes::WrapperBytes, program_utils::program::Program};
+use crate::{chia_wallet::core::bytes::Bytes, program_utils::program::Program};
 pub struct AssertMyCoinIdCondition {
-    coin_id: WrapperBytes,
+    coin_id: Bytes,
 }
 
 impl Condition for AssertMyCoinIdCondition {
@@ -18,7 +18,7 @@ impl Condition for AssertMyCoinIdCondition {
 impl AssertMyCoinIdCondition {
     const CONDITION_CODE: u32 = 70;
 
-    pub fn new(coin_id: WrapperBytes) -> Self {
+    pub fn new(coin_id: Bytes) -> Self {
         AssertMyCoinIdCondition { coin_id }
     }
 
@@ -27,7 +27,7 @@ impl AssertMyCoinIdCondition {
         if !Self::is_this_condition(&program) {
             return Err(InvalidConditionCastException);
         }
-        let coin_id = WrapperBytes::from_atom(program_list[1].clone());
+        let coin_id = Bytes::from_atom(program_list[1].clone());
         Ok(AssertMyCoinIdCondition { coin_id })
     }
 

@@ -1,5 +1,5 @@
 use crate::api::{bytes_to_hex, cmds_program_brun};
-use crate::blockchain::sized_bytes::*;
+use chia_utils_streamable_macro::sized_bytes::*;
 
 use crate::program_utils::serialized_program::SerializedProgram;
 

@@ -1,6 +1,6 @@
 use crate::blockchain::proof_of_space::ProofOfSpace;
-use crate::blockchain::sized_bytes::{Bytes32, Bytes96};
 use crate::blockchain::vdf_info::VdfInfo;
+use chia_utils_streamable_macro::sized_bytes::{Bytes32, Bytes96};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]

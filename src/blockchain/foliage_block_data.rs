@@ -1,5 +1,6 @@
 use crate::blockchain::pool_target::PoolTarget;
-use crate::blockchain::sized_bytes::{Bytes32, Bytes96};
+
+use chia_utils_streamable_macro::sized_bytes::{Bytes32, Bytes96};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]

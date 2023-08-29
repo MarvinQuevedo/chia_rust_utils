@@ -1,5 +1,5 @@
 use crate::blockchain::coin_spend::CoinSpend;
-use crate::blockchain::sized_bytes::Bytes96;
+use chia_utils_streamable_macro::sized_bytes::Bytes96;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]

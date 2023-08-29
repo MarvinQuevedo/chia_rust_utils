@@ -1,6 +1,6 @@
-use crate::blockchain::sized_bytes::Bytes32;
-use crate::blockchain::sized_bytes::SizedBytes;
 use crate::program_utils::utils::hash_256;
+use chia_utils_streamable_macro::sized_bytes::Bytes32;
+use chia_utils_streamable_macro::sized_bytes::SizedBytes;
 use serde::{Deserialize, Serialize};
 
 #[derive(Hash, PartialEq, Eq, Serialize, Deserialize, Debug)]

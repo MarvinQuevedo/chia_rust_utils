@@ -2,7 +2,7 @@
 use crate::blockchain::coin::Coin;
 use crate::blockchain::condition_opcode::ConditionOpcode;
 use crate::blockchain::condition_with_args::ConditionWithArgs;
-use crate::blockchain::sized_bytes::Bytes32;
+use  chia_utils_streamable_macro::sized_bytes::Bytes32;
 use crate::blockchain::utils::atom_to_int;
 use crate::program_utils::program::Program;
 use crate::program_utils::serialized_program::SerializedProgram;
@@ -235,6 +235,6 @@ pub fn conditions_for_solution(
  */
 
 use crate::blockchain::utils::atom_to_int;
-use crate::blockchain::{coin::Coin, sized_bytes::Bytes32};
+
 use crate::chia_wallet::core::conditions::condition_opcode::{ConditionOpcode, ConditionWithArgs};
 use std::collections::HashMap;

@@ -1,6 +1,6 @@
-use crate::blockchain::sized_bytes::Bytes32;
-use crate::blockchain::sized_bytes::SizedBytes;
 use crate::blockchain::vdf_info::VdfInfo;
+use chia_utils_streamable_macro::sized_bytes::Bytes32;
+use chia_utils_streamable_macro::sized_bytes::SizedBytes;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::error::Error;

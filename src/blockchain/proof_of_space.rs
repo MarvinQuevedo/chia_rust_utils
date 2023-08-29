@@ -1,5 +1,5 @@
-use crate::blockchain::sized_bytes::{Bytes32, Bytes48, SizedBytes, UnsizedBytes};
 use crate::chiapos::verifier::validate_proof;
+use chia_utils_streamable_macro::sized_bytes::{Bytes32, Bytes48, SizedBytes, UnsizedBytes};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::error::Error;

@@ -15,6 +15,7 @@ tiny-bip39 = "=1.0.0"
 chia = { path = "../chia_rs", version = ">=0.2.4" }
 chia-bls = { path = "../chia_rs/chia-bls", version = ">=0.2.4" }
 chia-protocol = { path = "../chia_rs/chia-protocol" }
+chia-utils-streamable-macro = { path = "./chia-utils-streamable-macro" }
 clvm-utils = { path = "../chia_rs/clvm-utils" }
 clvmr = { version = "0.2.6", features = ["pre-eval"] }
 clvm_tools_rs = { git = "https://github.com/MarvinQuevedo/clvm_tools_rs.git", rev ='1b1313c308b3d6a124332027447062141a2ad60d' }

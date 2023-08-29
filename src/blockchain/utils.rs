@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 use crate::blockchain::coin::Coin;
-use crate::blockchain::sized_bytes::Bytes32;
 use crate::chia_wallet::core::conditions::condition_opcode::{ConditionOpcode, ConditionWithArgs};
 use crate::chia_wallet::core::service::base_wallet::BaseWallet;
 use crate::program_utils::serialized_program::SerializedProgram;
+use chia_utils_streamable_macro::sized_bytes::Bytes32;
 use num_bigint::BigInt;
 
 pub fn created_outputs_for_conditions_dict(
@@ -17,11 +17,7 @@ pub fn created_outputs_for_conditions_dict(
             for cvp in args {
                 let puz_hash = cvp.vars[0].clone();
                 let amount = atom_to_int(&cvp.vars[1]).try_into().unwrap();
-                let coin = Coin {
-                    parent_coin_info: input_coin_name.clone(),
-                    puzzle_hash: puz_hash.into(),
-                    amount,
-                };
+                let coin = Coin::new(amount, input_coin_name.clone(), puz_hash.into());
                 output_coins.push(coin);
             }
         }

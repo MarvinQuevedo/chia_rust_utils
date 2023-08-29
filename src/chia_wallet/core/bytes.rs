@@ -1,8 +1,8 @@
 use std::hash::{Hash, Hasher};
 use std::io::Read;
 
-use crate::blockchain::sized_bytes::Bytes32;
 use crate::program_utils::program::Program;
+use chia_utils_streamable_macro::sized_bytes::Bytes32;
 use clvm_tools_rs::classic::clvm::__type_compatibility__::Bytes as CvlmBytes;
 use clvm_tools_rs::classic::clvm::__type_compatibility__::{sha256, BytesFromType};
 

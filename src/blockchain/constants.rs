@@ -1,4 +1,4 @@
-use crate::blockchain::sized_bytes::Bytes32;
+use chia_utils_streamable_macro::sized_bytes::Bytes32;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 

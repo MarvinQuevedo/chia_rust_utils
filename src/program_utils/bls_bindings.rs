@@ -1,4 +1,4 @@
-use crate::blockchain::sized_bytes::{Bytes48, Bytes96, SizedBytes};
+use chia_utils_streamable_macro::sized_bytes::{Bytes48, Bytes96, SizedBytes};
 
 use blst::min_pk::{PublicKey, Signature};
 use blst::BLST_ERROR;

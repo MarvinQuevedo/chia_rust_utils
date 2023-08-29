@@ -1,7 +1,7 @@
-use crate::blockchain::sized_bytes::hex_to_bytes;
 use crate::program_utils::program::Program;
 use crate::program_utils::serialize::node_from_bytes;
 use chia::gen::flags::MEMPOOL_MODE;
+use chia_utils_streamable_macro::sized_bytes::hex_to_bytes;
 use clvmr::allocator::{Allocator, NodePtr};
 use clvmr::chia_dialect::ChiaDialect;
 use clvmr::cost::Cost;

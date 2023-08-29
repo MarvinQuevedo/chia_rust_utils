@@ -1,11 +1,6 @@
 use chia_protocol::Bytes32;
-use clvmr::allocator::SExp::Atom;
-use clvmr::allocator::SExp::Pair;
-use clvmr::allocator::{Allocator, NodePtr};
 
 use sha2::{Digest, Sha256, Sha512};
-use std::collections::HashSet;
-use std::error::Error;
 
 pub const INFINITE_COST: u64 = 0x7FFFFFFFFFFFFFFF;
 

@@ -269,6 +269,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "chia-utils-streamable-macro"
+version = "0.2.4"
+dependencies = [
+ "blake3",
+ "blst",
+ "byteorder",
+ "hex",
+ "lazy_static",
+ "linked-hash-map",
+ "log",
+ "num",
+ "num-bigint",
+ "proc-macro-crate",
+ "proc-macro2",
+ "quote",
+ "regex",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "sha2 0.10.2",
+ "syn 2.0.29",
+ "yaml-rust",
+]
+
+[[package]]
 name = "chia_streamable_macro"
 version = "0.2.4"
 dependencies = [
@@ -1474,6 +1499,7 @@ dependencies = [
  "chia",
  "chia-bls",
  "chia-protocol",
+ "chia-utils-streamable-macro",
  "clvm-utils",
  "clvm_tools_rs",
  "clvmr 0.2.7",

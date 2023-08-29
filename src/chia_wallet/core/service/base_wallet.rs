@@ -1,28 +1,36 @@
 use crate::{
-    chia_wallet::core::{
-        blockchain_network::BlockchainNetwork,
-        bytes::{Bytes, Puzzlehash},
-        conditions::condition_opcode::ConditionOpcode,
-        conditions::{agg_sig_me_condition::AggSigMeCondition, conditions::Condition},
-        conditions::{
-            assert_coin_announcement_condition::AssertCoinAnnouncementCondition,
-            assert_puzzle_announcement_condition::AssertPuzzleAnnouncementConditionImp,
-            condition_opcode::ConditionWithArgs,
-            create_coin_announcement_condition::CreateCoinAnnouncementCondition,
-            create_puzzle_announcement_condition::CreatePuzzleAnnouncementCondition,
+    chia_wallet::{
+        core::{
+            blockchain_network::BlockchainNetwork,
+            bytes::{Bytes, Puzzlehash},
+            conditions::condition_opcode::ConditionOpcode,
+            conditions::{agg_sig_me_condition::AggSigMeCondition, conditions::Condition},
+            conditions::{
+                assert_coin_announcement_condition::AssertCoinAnnouncementCondition,
+                assert_puzzle_announcement_condition::AssertPuzzleAnnouncementConditionImp,
+                condition_opcode::ConditionWithArgs,
+                create_coin_announcement_condition::CreateCoinAnnouncementCondition,
+                create_coin_condition::CreateCoinCondition,
+                create_puzzle_announcement_condition::CreatePuzzleAnnouncementCondition,
+                reserve_fee_condition::ReserveFeeCondition,
+            },
+            keychain::WalletKeychain,
+            keywords::keyword,
+            payment::Payment,
         },
-        keywords::keyword,
-        payment::Payment,
+        standart::puzzles::p2_delegated_puzzle_or_hidden_puzzle::get_puzzle_from_pk,
     },
     program_utils::{
         node::Node, program::Program, serialize::node_to_bytes,
         serialized_program::SerializedProgram,
     },
 };
-use chia_bls::signature::Signature;
+use chia_bls::{signature::Signature, PublicKey};
 
-use chia_protocol::{Bytes32, Coin, CoinSpend};
+use chia_protocol::{Bytes32, Coin, CoinSpend, SpendBundle};
+use chia_utils_streamable_macro::bytes_utils::bytes_to_sha256;
 use clvmr::allocator::Allocator;
+use num::ToPrimitive;
 use num_bigint::BigInt;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -30,8 +38,170 @@ use std::collections::HashSet;
 pub struct BaseWallet {
     network: BlockchainNetwork,
 }
-
+pub trait MakeSolutionFromConditions {
+    fn call(&self, conditions: Vec<Box<dyn Condition>>) -> Program;
+}
 impl BaseWallet {
+    pub fn new(network: BlockchainNetwork) -> Self {
+        BaseWallet { network }
+    }
+    fn create_spend_bundle_base(
+        &self,
+        payments: Vec<Payment>,
+        coins_input: Vec<Coin>,
+        change_puzzlehash: Option<Puzzlehash>,
+        fee: BigInt,
+        origin_id: Option<Bytes32>,
+        coin_announcements_to_assert: Vec<AssertCoinAnnouncementCondition>,
+        puzzle_announcements_to_assert: Vec<AssertPuzzleAnnouncementConditionImp>,
+        make_puzzle_reveal_from_puzzlehash: fn(Puzzlehash) -> Program,
+        transform_standard_solution: Option<fn(Program) -> Program>,
+        make_signature_for_coin_spend: fn(CoinSpend) -> PublicKey,
+    ) -> SpendBundle {
+        fn make_solution_from_conditions<T: MakeSolutionFromConditions>(
+            conditions: Vec<Box<dyn Condition>>,
+            transform_standard_solution: Option<fn(Program) -> Program>,
+        ) -> Program
+        where
+            T: Fn(Vec<Box<dyn Condition>>) -> Program,
+        {
+            let standard_solution = BaseWallet::make_solution_from_conditions(conditions);
+            if let Some(transform) = transform_standard_solution {
+                transform(standard_solution)
+            } else {
+                standard_solution
+            }
+        }
+
+        let mut coins = coins_input.clone();
+        let total_coin_value = coins
+            .iter()
+            .fold(0, |previous_value, coin| previous_value + coin.amount);
+
+        let total_payment_amount = payments.iter().fold(0, |previous_value, payment| {
+            previous_value + payment.amount.into()
+        });
+        let change = (total_coin_value - total_payment_amount - fee)
+            .to_u64()
+            .unwrap();
+
+        if change_puzzlehash.is_none() && change > 0 {
+            panic!("ChangePuzzlehashNeededException");
+        }
+
+        let mut signatures = Vec::<PublicKey>::new();
+        let mut spends = Vec::<CoinSpend>::new();
+
+        let origin_index: usize = if let Some(origin_id) = origin_id {
+            coins
+                .iter()
+                .position(|coin| coin.coin_id() == origin_id)
+                .unwrap_or(usize::MAX)
+        } else {
+            0
+        };
+        if origin_index == usize::MAX {
+            panic!("OriginIdNotInCoinsException");
+        }
+
+        if origin_index != 0 {
+            let origin_coin = coins.remove(origin_index);
+            coins.insert(0, origin_coin);
+        }
+
+        let mut primary_assert_coin_announcement = None;
+
+        let mut first = true;
+        for coin in coins {
+            let solution;
+            if first {
+                first = false;
+                let mut conditions: Vec<Box<dyn Condition>> = Vec::new();
+                let mut created_coins = Vec::<Coin>::new();
+                for payment in payments {
+                    let mut send_create_coin_condition = payment.to_create_coin_condition();
+                    conditions.push(Box::new(send_create_coin_condition));
+                    created_coins.push(Coin::new(
+                        coin.name(),
+                        payment.puzzle_hash.to_bytes32(),
+                        payment.amount_u64(),
+                    ));
+                }
+
+                if change.to_u64().unwrap() > 0 {
+                    conditions.push(Box::new(CreateCoinCondition::new(
+                        change_puzzlehash.unwrap(),
+                        change.into(),
+                        None,
+                    )));
+                    created_coins.push(Coin {
+                        parent_coin_info: coin.name(),
+                        puzzle_hash: change_puzzlehash.unwrap().to_bytes32(),
+                        amount: change.to_u64().unwrap(),
+                    });
+                }
+
+                if fee.to_u64().unwrap() > 0 {
+                    conditions.push(Box::new(ReserveFeeCondition::new(fee)));
+                }
+                for coin_announcement in coin_announcements_to_assert.clone() {
+                    conditions.push(Box::new(coin_announcement));
+                }
+                for puzzle_announcement in puzzle_announcements_to_assert.clone() {
+                    conditions.push(Box::new(puzzle_announcement));
+                }
+
+                let mut existing_coins_message = Vec::new();
+                for coin in coins {
+                    existing_coins_message.extend_from_slice(coin.name().raw());
+                }
+
+                let mut created_coins_message = Vec::new();
+                for coin in created_coins {
+                    created_coins_message.extend_from_slice(&coin.name().raw());
+                }
+
+                let message = Bytes::from(bytes_to_sha256(
+                    [&existing_coins_message[..], &created_coins_message[..]].concat(),
+                ));
+
+                conditions.push(Box::new(CreateCoinAnnouncementCondition {
+                    announcement_hash: message,
+                }));
+
+                primary_assert_coin_announcement = Some(AssertCoinAnnouncementCondition::new(
+                    Bytes::from(coin.name()),
+                    message,
+                ));
+
+                solution = make_solution_from_conditions(conditions, transform_standard_solution);
+            } else {
+                solution = make_solution_from_conditions(
+                    vec![primary_assert_coin_announcement.unwrap()],
+                    transform_standard_solution,
+                );
+            }
+
+            let puzzle = make_puzzle_reveal_from_puzzlehash(coin.puzzlehash);
+            let coin_spend = CoinSpend {
+                coin,
+                puzzle_reveal: puzzle,
+                solution,
+            };
+            spends.push(coin_spend);
+
+            let signature = make_signature_for_coin_spend(coin_spend);
+            signatures.push(signature);
+        }
+
+        let aggregate = AugSchemeMPL::aggregate(&signatures);
+
+        SpendBundle {
+            coin_spends: spends,
+            aggregated_signature: aggregate,
+        }
+    }
+
     pub fn get_add_sig_me_message_from_result(
         result: Program,
         coin: Coin,
@@ -319,4 +489,9 @@ fn test_coin() {
         Bytes32::from_hex(&"e30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18a")
             .unwrap();
     let coin = Coin::new(parent, ph, amount.into());
+    let coin_id = coin.name();
+    let spected_coin_id =
+        Bytes32::from_hex(&"4dce323de4276e5754fdac8d615f3a537161042e1f4dbdf319e8a80c142b6835")
+            .unwrap();
+    assert_eq!(coin_id, spected_coin_id);
 }

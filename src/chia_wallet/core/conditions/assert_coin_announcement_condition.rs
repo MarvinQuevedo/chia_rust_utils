@@ -4,9 +4,9 @@ use crate::{chia_wallet::core::bytes::Bytes, program_utils::program::Program};
 use super::conditions::check_is_this_condition;
 
 pub struct AssertCoinAnnouncementCondition {
-    coin_id: Bytes,
-    message: Bytes,
-    morph_bytes: Option<Bytes>,
+    pub coin_id: Bytes,
+    pub message: Bytes,
+    pub morph_bytes: Option<Bytes>,
 }
 
 impl Condition for AssertCoinAnnouncementCondition {
@@ -18,6 +18,15 @@ impl Condition for AssertCoinAnnouncementCondition {
         .to_vec();
 
         return Program::from(list_data);
+    }
+}
+impl Clone for AssertCoinAnnouncementCondition {
+    fn clone(&self) -> Self {
+        AssertCoinAnnouncementCondition {
+            coin_id: self.coin_id.clone(),
+            message: self.message.clone(),
+            morph_bytes: self.morph_bytes.clone(),
+        }
     }
 }
 

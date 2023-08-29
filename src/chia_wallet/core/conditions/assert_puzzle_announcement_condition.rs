@@ -32,6 +32,14 @@ impl Condition for AssertPuzzleAnnouncementConditionImp {
     }
 }
 
+impl Clone for AssertPuzzleAnnouncementConditionImp {
+    fn clone(&self) -> Self {
+        AssertPuzzleAnnouncementConditionImp {
+            announcement_hash: self.announcement_hash.clone(),
+        }
+    }
+}
+
 impl AssertPuzzleAnnouncementConditionImp {
     const CONDITION_CODE: u32 = 63;
 

@@ -13,7 +13,7 @@ use super::unhardened_wallet_vector::UnhardenedWalletVector;
 use super::wallet_puzzlehash::WalletPuzzlehash;
 use super::wallet_vector::WalletVector;
 
-struct WalletKeychain {
+pub struct WalletKeychain {
     hardened_map: LinkedHashMap<Puzzlehash, WalletVector>,
     unhardened_map: LinkedHashMap<Puzzlehash, UnhardenedWalletVector>,
     singleton_wallet_vectors_map: HashMap<PublicKeyWrapper, SingletonWalletVector>,

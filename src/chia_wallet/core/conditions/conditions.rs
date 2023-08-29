@@ -5,7 +5,6 @@ use crate::program_utils::program::Program;
 pub trait Condition {
     fn program(&self) -> Program;
 }
-
 pub fn check_is_this_condition(condition: &Program, condition_code: u32) -> bool {
     check_is_this_condition_with_parts_len(condition, condition_code, 2)
 }

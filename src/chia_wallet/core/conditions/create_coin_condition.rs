@@ -7,7 +7,7 @@ use crate::chia_wallet::core::conditions::conditions::Condition;
 use crate::chia_wallet::core::payment::Payment;
 use crate::{chia_wallet::core::bytes::Bytes, program_utils::program::Program};
 pub struct CreateCoinCondition {
-    destination_puzzlehash: Puzzlehash,
+    puzzle_hash: Puzzlehash,
     amount: BigInt,
     memos: Option<Vec<Bytes>>,
 }
@@ -16,7 +16,7 @@ impl Condition for CreateCoinCondition {
     fn program(&self) -> Program {
         let mut program_list = vec![
             Program::from(Self::CONDITION_CODE),
-            Program::from(&self.destination_puzzlehash.to_bytes().raw()),
+            Program::from(&self.puzzle_hash.to_bytes().raw()),
             Program::from(&self.amount),
         ];
 
@@ -34,13 +34,9 @@ impl Condition for CreateCoinCondition {
 impl CreateCoinCondition {
     const CONDITION_CODE: u32 = 63;
 
-    pub fn new(
-        destination_puzzlehash: Puzzlehash,
-        amount: BigInt,
-        memos: Option<Vec<Bytes>>,
-    ) -> Self {
+    pub fn new(puzzle_hash: Puzzlehash, amount: BigInt, memos: Option<Vec<Bytes>>) -> Self {
         CreateCoinCondition {
-            destination_puzzlehash,
+            puzzle_hash,
             amount,
             memos,
         }
@@ -67,7 +63,7 @@ impl CreateCoinCondition {
         };
 
         Ok(CreateCoinCondition {
-            destination_puzzlehash,
+            puzzle_hash: destination_puzzlehash,
             amount,
             memos,
         })
@@ -76,7 +72,7 @@ impl CreateCoinCondition {
     pub fn to_payment(&self) -> Payment {
         Payment::new(
             self.amount.clone(),
-            self.destination_puzzlehash.clone(),
+            self.puzzle_hash.clone(),
             self.memos.clone(),
         )
     }

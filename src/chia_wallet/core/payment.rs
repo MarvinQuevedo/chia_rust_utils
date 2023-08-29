@@ -1,3 +1,4 @@
+use num::ToPrimitive;
 use num_bigint::BigInt;
 
 use crate::program_utils::program::Program;
@@ -8,33 +9,32 @@ use super::{
 };
 
 pub struct Payment {
-    amount: BigInt,
-    destination_puzzlehash: Puzzlehash,
-    memos: Option<Vec<Bytes>>,
+    pub amount: BigInt,
+    pub puzzle_hash: Puzzlehash,
+    pub memos: Option<Vec<Bytes>>,
 }
 
 impl Payment {
-    pub fn new(
-        amount: BigInt,
-        destination_puzzlehash: Puzzlehash,
-        memos: Option<Vec<Bytes>>,
-    ) -> Self {
+    pub fn new(amount: BigInt, puzzlehash: Puzzlehash, memos: Option<Vec<Bytes>>) -> Self {
         Payment {
             amount,
-            destination_puzzlehash,
+            puzzle_hash: puzzlehash,
             memos,
         }
     }
+    pub fn amount_u64(&self) -> u64 {
+        self.amount.to_u64().unwrap()
+    }
     pub fn to_create_coin_condition(&self) -> CreateCoinCondition {
         CreateCoinCondition::new(
-            self.destination_puzzlehash.clone(),
+            self.puzzle_hash.clone(),
             self.amount.clone(),
             self.memos.clone(),
         )
     }
     pub fn to_program(&self) -> Program {
         let mut program_list = vec![
-            Program::from(&self.destination_puzzlehash.to_bytes().raw()),
+            Program::from(&self.puzzle_hash.to_bytes().raw()),
             Program::from(&self.amount),
         ];
 
@@ -58,7 +58,7 @@ impl Payment {
 
         Payment {
             amount: program_list[1].as_int().unwrap(),
-            destination_puzzlehash: Puzzlehash::from_atom(program_list[0].clone()),
+            puzzle_hash: Puzzlehash::from_atom(program_list[0].clone()),
             memos,
         }
     }

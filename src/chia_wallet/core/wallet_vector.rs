@@ -78,4 +78,7 @@ impl WalletVector {
     pub fn to_wallet_puzzlehash(&self) -> WalletPuzzlehash {
         WalletPuzzlehash::from_puzzlehash(&self.puzzlehash, self.derivation_index)
     }
+    pub fn child_public_key(&self) -> chia_bls::public_key::PublicKey {
+        self.child_private_key.public_key()
+    }
 }

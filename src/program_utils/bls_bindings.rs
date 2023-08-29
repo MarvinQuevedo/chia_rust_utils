@@ -1,7 +1,6 @@
-use chia_utils_streamable_macro::sized_bytes::{Bytes48, Bytes96, SizedBytes};
-
 use blst::min_pk::{PublicKey, Signature};
 use blst::BLST_ERROR;
+use chia_protocol::{Bytes48, Bytes96};
 
 //const BASIC_SCHEME_DST: &[u8; 43] = b"BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_";
 const AUG_SCHEME_DST: &[u8; 43] = b"BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_AUG_";

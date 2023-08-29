@@ -13,7 +13,7 @@ lazy_static::lazy_static! {
     /// This is the hash of the cat puzzle, in a bytes vec
     pub static ref CAT_MOD_HASH: Vec<u8> = {
         let program = CAT_MOD.clone();
-        program.tree_hash().to_sized_bytes().to_vec().clone()
+        program.tree_hash().to_bytes()
     };
     /// This is the hash of the cat puzzle, in a Atom program
     pub static ref CAT_MOD_HASH_PROGRAM: Program = {

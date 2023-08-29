@@ -17,6 +17,6 @@ impl Announcement {
         let mut to_hash: Vec<u8> = Vec::new();
         to_hash.extend(&self.origin_info.to_bytes());
         to_hash.extend(&self.message);
-        hash_256(to_hash)
+        hash_256(to_hash).to_bytes()
     }
 }

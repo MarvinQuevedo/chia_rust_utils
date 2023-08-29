@@ -31,7 +31,7 @@ pub fn solutionForConditions(conditions: Program) -> Program {
 
 pub fn get_puzzle_from_pk_and_hidden_puzzle(pk: PublicKey, hidden_puzzle: Program) -> Program {
     let pk_bytes = pk.to_bytes().to_vec();
-    let hidden_puzzle_hash = hidden_puzzle.tree_hash().to_sized_bytes().to_vec();
+    let hidden_puzzle_hash = hidden_puzzle.tree_hash().to_bytes();
     let args = Program::from(
         [
             Program::from(pk_bytes.clone()),
@@ -43,8 +43,7 @@ pub fn get_puzzle_from_pk_and_hidden_puzzle(pk: PublicKey, hidden_puzzle: Progra
     let synthetic_pub_key = calculate_synthetic_public_key_program().run(args);
 
     let p2_args = [synthetic_pub_key.program].to_vec();
-    let curried = p2_delegated_puzzle_or_hidden_puzzle_program()
-        .curry(p2_args) ;
+    let curried = p2_delegated_puzzle_or_hidden_puzzle_program().curry(p2_args);
     return curried;
 }
 

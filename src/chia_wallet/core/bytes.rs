@@ -2,7 +2,7 @@ use std::hash::{Hash, Hasher};
 use std::io::Read;
 
 use crate::program_utils::program::Program;
-use chia_utils_streamable_macro::sized_bytes::Bytes32;
+use chia_protocol::Bytes32;
 use clvm_tools_rs::classic::clvm::__type_compatibility__::Bytes as CvlmBytes;
 use clvm_tools_rs::classic::clvm::__type_compatibility__::{sha256, BytesFromType};
 
@@ -60,7 +60,7 @@ impl From<CvlmBytes> for Bytes {
 impl From<Bytes32> for Bytes {
     fn from(bytes: Bytes32) -> Self {
         Bytes(CvlmBytes::new(Some(BytesFromType::Raw(
-            bytes.to_sized_bytes().to_vec(),
+            bytes.to_bytes().to_vec(),
         ))))
     }
 }
@@ -110,6 +110,10 @@ impl Puzzlehash {
     }
     pub fn to_bytes(&self) -> Bytes {
         return Bytes::from(self.0.to_vec());
+    }
+    pub fn to_bytes32(&self) -> Bytes32 {
+        let bytes = self.0;
+        return Bytes32::from(bytes);
     }
 }
 

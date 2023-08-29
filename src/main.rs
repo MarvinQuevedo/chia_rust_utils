@@ -27,9 +27,9 @@ fn main() {
     // let acs_ph = acs.clone().tree_hash().to_sized_bytes().to_vec();
     let empyth_program_lst: Vec<Program> = vec![];
     let tail = Program::from(empyth_program_lst);
-    let tail_hash = tail.tree_hash().to_sized_bytes().to_vec();
+    let tail_hash = tail.tree_hash().raw().to_vec();
     let cat_puzzle = create_cat_puzzle(tail_hash.clone(), acs.clone().serialized.clone());
-    let cat_puzzlehash = cat_puzzle.tree_hash().to_sized_bytes().to_vec();
+    let cat_puzzlehash = cat_puzzle.tree_hash().raw().to_vec();
     let uncurried = program_uncurry(cat_puzzle.serialized.clone());
     //println!("uncurried: {}", bytes_to_hex(uncurried.program.clone()));
 

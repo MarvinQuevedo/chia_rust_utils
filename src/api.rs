@@ -306,7 +306,7 @@ pub fn program_tree_hash(ser_program_bytes: Vec<u8>) -> [u8; 32] {
     let program = SerializedProgram::from_bytes(&ser_program_bytes)
         .to_program()
         .unwrap();
-    return program.tree_hash().to_sized_bytes();
+    return program.tree_hash().raw_sized();
 }
 
 pub fn program_curry(ser_program_bytes: Vec<u8>, args_str: Vec<String>) -> Vec<u8> {

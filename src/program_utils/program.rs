@@ -1,5 +1,6 @@
-use crate::api::{bytes_to_hex, cmds_program_brun};
-use chia_utils_streamable_macro::sized_bytes::*;
+use crate::api::cmds_program_brun;
+use crate::chia_wallet::core::bytes::Puzzlehash;
+use chia_protocol::Bytes32;
 
 use crate::program_utils::serialized_program::SerializedProgram;
 
@@ -42,55 +43,6 @@ pub struct RunOutput {
     pub cost: u64,
     pub error: Option<String>,
 }
-
-macro_rules! impl_sized_bytes {
-    ($($name: ident, $size:expr);*) => {
-        $(
-            impl From<$name> for Program {
-                fn from(bytes: $name) -> Self {
-                    bytes.to_bytes().into()
-                }
-            }
-            impl From<&$name> for Program {
-                fn from(bytes: &$name) -> Self {
-                    bytes.to_bytes().into()
-                }
-            }
-            impl Into<$name> for Program {
-                fn into(self) -> $name {
-                    let vec_len = self.serialized.len();
-                    if vec_len == $size + 1 {
-                        $name::new(self.serialized[1..].to_vec())
-                    } else {
-                        $name::new(self.serialized)
-                    }
-                }
-            }
-            impl Into<$name> for &Program {
-                fn into(self) -> $name {
-                    let vec_len = self.serialized.len();
-                    if vec_len == $size + 1 {
-                        $name::new(self.serialized[1..].to_vec())
-                    } else {
-                        $name::new(self.serialized.clone())
-                    }
-                }
-            }
-        )*
-    };
-    ()=>{};
-}
-
-impl_sized_bytes!(
-    UnsizedBytes, 0;
-    Bytes4, 4;
-    Bytes8, 8;
-    Bytes16, 16;
-    Bytes32, 32;
-    Bytes48, 48;
-    Bytes96, 96;
-    Bytes192, 192
-);
 
 macro_rules! impl_ints {
     ($($name: ident, $size: expr);*) => {
@@ -507,6 +459,28 @@ impl From<&Vec<u8>> for Program {
         prog
     }
 }
+
+impl From<Bytes32> for Program {
+    /// Atom program from bytes
+    fn from(bytes: Bytes32) -> Self {
+        let mut alloc = Allocator::new();
+        let atom = match alloc.new_atom(bytes.raw()) {
+            Ok(ptr) => ptr,
+            Err(_) => alloc.null(),
+        };
+        let node = Node::new(&alloc, atom);
+        let node_bytes = match node_to_bytes(&node) {
+            Ok(n_bytes) => n_bytes,
+            Err(_) => Vec::new(),
+        };
+        let prog = Program {
+            serialized: node_bytes,
+            alloc: alloc,
+            nodeptr: atom,
+        };
+        prog
+    }
+}
 impl From<&u32> for Program {
     /// Atom program from integer
     fn from(number: &u32) -> Self {
@@ -682,6 +656,8 @@ impl Program {
             Ok(node) => node,
             Err(_) => alloc2.null(),
         };
-        Bytes32::new(sha256tree(&mut alloc2, nodeptr).raw())
+        let hash_bytes = sha256tree(&mut alloc2, nodeptr).raw();
+        let puzzle_hash = Puzzlehash::from_bytes(&hash_bytes);
+        Bytes32::from(puzzle_hash.byte_list())
     }
 }

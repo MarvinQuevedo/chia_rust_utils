@@ -1,5 +1,4 @@
-use chia_utils_streamable_macro::sized_bytes::Bytes32;
-
+use chia_protocol::Bytes32;
 use clvmr::allocator::SExp::Atom;
 use clvmr::allocator::SExp::Pair;
 use clvmr::allocator::{Allocator, NodePtr};
@@ -10,37 +9,12 @@ use std::error::Error;
 
 pub const INFINITE_COST: u64 = 0x7FFFFFFFFFFFFFFF;
 
-pub fn tree_hash(
-    alloc: &Allocator,
-    node_ptr: NodePtr,
-    precalculated: &HashSet<Bytes32>,
-) -> Result<Bytes32, Box<dyn Error>> {
-    match alloc.sexp(node_ptr) {
-        Atom() => {
-            let atom = alloc.atom(node_ptr);
-            if precalculated.contains(&Vec::from(atom).into()) {
-                Ok(Vec::from(atom).into())
-            } else {
-                let mut byte_buf = Vec::new();
-                byte_buf.extend([b'1']);
-                byte_buf.extend(atom);
-                Ok(hash_256(byte_buf).into())
-            }
-        }
-        Pair(first, rest) => {
-            let mut byte_buf = Vec::new();
-            byte_buf.extend([b'2']);
-            byte_buf.append(&mut tree_hash(&alloc, first, &precalculated)?.into());
-            byte_buf.append(&mut tree_hash(&alloc, rest, &precalculated)?.into());
-            Ok(hash_256(byte_buf).into())
-        }
-    }
-}
-
-pub fn hash_256(input: Vec<u8>) -> Vec<u8> {
+pub fn hash_256(input: Vec<u8>) -> Bytes32 {
     let mut hasher = Sha256::new();
     hasher.update(input);
-    hasher.finalize().to_vec()
+    let bytes = hasher.finalize().to_vec();
+    let bytes_32: [u8; 32] = bytes[..32].try_into().expect("slice with incorrect length");
+    Bytes32::from(bytes_32)
 }
 
 pub fn hash_512(input: Vec<u8>) -> Vec<u8> {

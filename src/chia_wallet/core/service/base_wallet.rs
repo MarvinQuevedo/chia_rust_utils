@@ -1,8 +1,6 @@
 use crate::{
-    blockchain::coin_spend::CoinSpend,
     chia_wallet::core::{
         blockchain_network::BlockchainNetwork,
-        blockchain_wrappers::coin::Coin,
         bytes::{Bytes, Puzzlehash},
         conditions::condition_opcode::ConditionOpcode,
         conditions::{agg_sig_me_condition::AggSigMeCondition, conditions::Condition},
@@ -23,6 +21,7 @@ use crate::{
 };
 use chia_bls::signature::Signature;
 
+use chia_protocol::{Bytes32, Coin, CoinSpend};
 use clvmr::allocator::Allocator;
 use num_bigint::BigInt;
 use std::collections::HashMap;
@@ -52,7 +51,7 @@ impl BaseWallet {
             .as_vec()
             .unwrap();
 
-        let id = coin.name().raw();
+        let id = coin.coin_id();
         let extra_data = Bytes::from_hex(&network.agg_sig_me_extra_data)
             .unwrap()
             .raw();
@@ -127,7 +126,7 @@ impl BaseWallet {
         let mut id_set: HashSet<String> = HashSet::new();
 
         for coin in coins {
-            let coin_id_hex = hex::encode(&coin.name().raw());
+            let coin_id_hex = hex::encode(&coin.coin_id());
             if id_set.contains(&coin_id_hex) {
                 return Err(DuplicateCoinException {
                     coin_id_hex: coin_id_hex.clone(),
@@ -309,4 +308,15 @@ fn test_make_solution() {
     let equal_program =  "(() (q (63 0xe30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18c 100) (60 0xe30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18c) (61 0xb334ae7173a5e65e0a380952707904ae22fd097e11d5101f2c1876b74f5ca33e) (62 0xe30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b120) (63 0x3659e109ac94549c9393f3bcdfd950cc63c4c90c838afe822f64ba3d9167de00)) ())";
 
     assert_eq!(solution.to_source(None), equal_program);
+}
+
+#[test]
+fn test_coin() {
+    let amount: u64 = 100;
+    let ph = Bytes32::from_hex(&"e30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18c")
+        .unwrap();
+    let parent =
+        Bytes32::from_hex(&"e30a9dc6c0379a72d77afa8d596a91399f9d18dbe5a87168b7a9b5381596b18a")
+            .unwrap();
+    let coin = Coin::new(parent, ph, amount.into());
 }

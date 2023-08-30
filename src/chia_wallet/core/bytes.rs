@@ -111,7 +111,7 @@ impl Puzzlehash {
     pub fn to_bytes(&self) -> Bytes {
         return Bytes::from(self.0.to_vec());
     }
-    pub fn to_bytes32<const N: usize>(&self) -> Bytes32 {
+    pub fn to_bytes32(&self) -> Bytes32 {
         let bytes = self.0;
         return Bytes32::from(bytes);
     }
@@ -123,6 +123,15 @@ impl From<Bytes> for Puzzlehash {
         let mut puzzlehash_bytes = [0u8; 32];
         for i in 0..32 {
             puzzlehash_bytes[i] = bytes.raw()[i];
+        }
+        Puzzlehash(puzzlehash_bytes)
+    }
+}
+impl From<Bytes32> for Puzzlehash {
+    fn from(bytes: Bytes32) -> Self {
+        let mut puzzlehash_bytes = [0u8; 32];
+        for i in 0..32 {
+            puzzlehash_bytes[i] = bytes.to_bytes()[i];
         }
         Puzzlehash(puzzlehash_bytes)
     }

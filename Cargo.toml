@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies] 
-flutter_rust_bridge = "1.68.0"
+flutter_rust_bridge = "1.81.0"
 num = "0.4"
 image = "0.24.3"
 crossbeam = "0.8"
@@ -17,6 +17,7 @@ chia-bls = { path = "../chia_rs/chia-bls", version = ">=0.2.4" }
 chia-protocol = { path = "../chia_rs/chia-protocol" }
 chia-utils-streamable-macro = { path = "./chia-utils-streamable-macro" }
 clvm-utils = { path = "../chia_rs/clvm-utils" }
+chia-traits = { path = "../chia_rs/chia-traits" }
 clvmr = { version = "0.2.6", features = ["pre-eval"] }
 clvm_tools_rs = { git = "https://github.com/MarvinQuevedo/clvm_tools_rs.git", rev ='1b1313c308b3d6a124332027447062141a2ad60d' }
 serde = { version = "1.0", features = ["derive"] }
@@ -36,11 +37,12 @@ byteorder = "1.4.3"
 
 
 [lib]
+path = "src/lib.rs"
 name = "rust_bls_flutter"
 crate-type = ["cdylib", "staticlib"]
 
-[target.'cfg(target_arch = "wasm32")']
-rustflags = ["-C", "link-arg=-s", "-C", "link-arg=--no-entry"]
+#[target.'cfg(target_arch = "wasm32")']
+#rustflags = ["-C", "link-arg=-s", "-C", "link-arg=--no-entry"]
 
 [[bin]]
 name = "test"

@@ -155,46 +155,6 @@ pub fn decode_int(bytes: Vec<u8>) -> i32 {
     bytes_to_int(bytes, Endian::Big, true)
 }
 
-pub fn big_int_to_bytes(value: i128, size: usize, endian: Endian, signed: bool) -> Vec<u8> {
-    if value < 0 && !signed {
-        panic!("Cannot convert negative bigint to unsigned.");
-    }
-    let binary = format!("{:0width$b}", value, width = size * 8);
-    let binary = if value < 0 {
-        let flipped = flip(binary);
-        format!(
-            "{:0width$b}",
-            i128::from_str_radix(&flipped, 2).unwrap() + 1,
-            width = size * 8
-        )
-    } else {
-        binary
-    };
-
-    let bytes: Vec<u8> = binary
-        .as_bytes()
-        .chunks(8)
-        .map(|chunk| u8::from_str_radix(std::str::from_utf8(chunk).unwrap(), 2).unwrap())
-        .collect();
-
-    match endian {
-        Endian::Little => bytes.into_iter().rev().collect(),
-        Endian::Big => bytes,
-    }
-}
-
-pub fn encode_big_int(value: i128) -> Vec<u8> {
-    if value == 0 {
-        return vec![];
-    }
-    let length = (num_bits(value as i32) + 8) / 8;
-    let mut bytes = big_int_to_bytes(value, length, Endian::Big, true);
-    while bytes.len() > 1 && bytes[0] == if bytes[1] & 0x80 != 0 { 0xFF } else { 0x00 } {
-        bytes.remove(0);
-    }
-    bytes
-}
-
 #[derive(Debug, PartialEq, Eq)]
 pub enum Endian {
     Little,

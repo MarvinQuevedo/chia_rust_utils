@@ -1,5 +1,3 @@
-use std::collections::BTreeMap;
-
 use chia_bls::derivable_key::DerivableKey;
 use chia_bls::derive_keys;
 use chia_bls::mnemonic::entropy_to_mnemonic;
@@ -15,7 +13,6 @@ use clvm_tools_rs::classic::clvm_tools::binutils::disassemble;
 use clvm_tools_rs::classic::clvm_tools::cmds::{launch_tool, OpcConversion, OpdConversion};
 use clvmr::allocator::Allocator;
 use sha2::{Digest, Sha256};
-use yaml_rust::YamlEmitter;
 
 use crate::chia_wallet::cat::puzzles::create_cat_outer_puzzle::create_cat_puzzle;
 use crate::chia_wallet::standart::puzzles::p2_delegated_puzzle_or_hidden_puzzle::get_puzzle_from_pk;

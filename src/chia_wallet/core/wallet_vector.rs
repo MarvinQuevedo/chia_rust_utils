@@ -82,3 +82,14 @@ impl WalletVector {
         self.child_private_key.public_key()
     }
 }
+
+impl Clone for WalletVector {
+    fn clone(&self) -> Self {
+        WalletVector {
+            child_private_key: self.child_private_key.clone(),
+            puzzlehash: self.puzzlehash.clone(),
+            derivation_index: self.derivation_index,
+            asset_id_to_outer_puzzlehash: self.asset_id_to_outer_puzzlehash.clone(),
+        }
+    }
+}

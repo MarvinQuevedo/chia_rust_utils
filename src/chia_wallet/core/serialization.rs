@@ -21,6 +21,11 @@ impl std::hash::Hash for PublicKeyWrapper {
         self.0.to_bytes().hash(state);
     }
 }
+impl Clone for PublicKeyWrapper {
+    fn clone(&self) -> Self {
+        PublicKeyWrapper(self.0.clone())
+    }
+}
 
 pub fn string_from_stream(mut iterator: std::slice::Iter<u8>) -> Result<String> {
     let mut string_length_bytes = [0; 4];

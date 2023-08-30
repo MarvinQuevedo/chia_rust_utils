@@ -21,7 +21,7 @@ use crate::{
         standart::puzzles::p2_delegated_puzzle_or_hidden_puzzle::get_puzzle_from_pk,
     },
     program_utils::{
-        node::Node, program::Program, serialize::node_to_bytes,
+        bls_bindings::AugSchemeMPL, node::Node, program::Program, serialize::node_to_bytes,
         serialized_program::SerializedProgram,
     },
 };
@@ -38,9 +38,53 @@ use std::collections::HashSet;
 pub struct BaseWallet {
     network: BlockchainNetwork,
 }
-pub trait MakeSolutionFromConditions {
-    fn call(&self, conditions: Vec<Box<dyn Condition>>) -> Program;
+pub trait WalletDecoration {
+    fn make_solution_from_conditions(&self, conditions: Vec<Box<dyn Condition>>) -> Program;
+    fn make_puzzle_reveal_from_puzzlehash(
+        &self,
+        puzzle_hash: Puzzlehash,
+        keychain: WalletKeychain,
+    ) -> Program;
+    fn transform_standard_solution(&self, solution: Program) -> Program;
+    fn make_signature_for_coin_spend(
+        &self,
+        coin_spend: CoinSpend,
+        keychain: WalletKeychain,
+    ) -> chia_bls::Signature;
 }
+impl<'a> WalletDecoration for &'a BaseWallet {
+    fn make_solution_from_conditions(&self, conditions: Vec<Box<dyn Condition>>) -> Program {
+        BaseWallet::make_solution_from_conditions(conditions)
+    }
+    fn make_puzzle_reveal_from_puzzlehash(
+        &self,
+        puzzle_hash: Puzzlehash,
+        keychain: WalletKeychain,
+    ) -> Program {
+        let vector = keychain.get_wallet_vector(puzzle_hash);
+        match vector {
+            Some(vector) => {
+                let pk = vector.child_public_key();
+                get_puzzle_from_pk(pk)
+            }
+            None => {
+                panic!("PuzzleHashNotInKeychain");
+            }
+        }
+    }
+
+    fn transform_standard_solution(&self, solution: Program) -> Program {
+        BaseWallet::make_solution_from_program(solution)
+    }
+    fn make_signature_for_coin_spend(
+        &self,
+        coin_spend: CoinSpend,
+        keychain: WalletKeychain,
+    ) -> chia_bls::Signature {
+        panic!("NotImplemented");
+    }
+}
+
 impl BaseWallet {
     pub fn new(network: BlockchainNetwork) -> Self {
         BaseWallet { network }
@@ -49,16 +93,16 @@ impl BaseWallet {
         &self,
         payments: Vec<Payment>,
         coins_input: Vec<Coin>,
-        change_puzzlehash: Option<Puzzlehash>,
+        change_puzzlehash: Puzzlehash,
         fee: BigInt,
         origin_id: Option<Bytes32>,
         coin_announcements_to_assert: Vec<AssertCoinAnnouncementCondition>,
         puzzle_announcements_to_assert: Vec<AssertPuzzleAnnouncementConditionImp>,
         make_puzzle_reveal_from_puzzlehash: fn(Puzzlehash) -> Program,
         transform_standard_solution: Option<fn(Program) -> Program>,
-        make_signature_for_coin_spend: fn(CoinSpend) -> PublicKey,
+        keychain: WalletKeychain,
     ) -> SpendBundle {
-        fn make_solution_from_conditions<T: MakeSolutionFromConditions>(
+        /*   fn make_solution_from_conditions<T: MakeSolutionFromConditions>(
             conditions: Vec<Box<dyn Condition>>,
             transform_standard_solution: Option<fn(Program) -> Program>,
         ) -> Program
@@ -71,7 +115,8 @@ impl BaseWallet {
             } else {
                 standard_solution
             }
-        }
+        } */
+        let fee_amount = fee.clone().to_u64().unwrap();
 
         let mut coins = coins_input.clone();
         let total_coin_value = coins
@@ -79,17 +124,15 @@ impl BaseWallet {
             .fold(0, |previous_value, coin| previous_value + coin.amount);
 
         let total_payment_amount = payments.iter().fold(0, |previous_value, payment| {
-            previous_value + payment.amount.into()
+            previous_value + payment.amount.to_u64().unwrap()
         });
         let change = (total_coin_value - total_payment_amount - fee)
             .to_u64()
             .unwrap();
 
-        if change_puzzlehash.is_none() && change > 0 {
-            panic!("ChangePuzzlehashNeededException");
-        }
+        let change_puzzle_hash = change_puzzlehash.clone();
 
-        let mut signatures = Vec::<PublicKey>::new();
+        let mut signatures = Vec::<chia_bls::Signature>::new();
         let mut spends = Vec::<CoinSpend>::new();
 
         let origin_index: usize = if let Some(origin_id) = origin_id {
@@ -109,17 +152,18 @@ impl BaseWallet {
             coins.insert(0, origin_coin);
         }
 
-        let mut primary_assert_coin_announcement = None;
+        let mut primary_assert_coin_announcement: Option<Box<AssertCoinAnnouncementCondition>> =
+            None;
 
         let mut first = true;
-        for coin in coins {
+        for coin in coins.clone() {
             let solution;
             if first {
                 first = false;
                 let mut conditions: Vec<Box<dyn Condition>> = Vec::new();
                 let mut created_coins = Vec::<Coin>::new();
-                for payment in payments {
-                    let mut send_create_coin_condition = payment.to_create_coin_condition();
+                for payment in payments.clone() {
+                    let send_create_coin_condition = payment.to_create_coin_condition();
                     conditions.push(Box::new(send_create_coin_condition));
                     created_coins.push(Coin::new(
                         coin.name(),
@@ -130,19 +174,19 @@ impl BaseWallet {
 
                 if change.to_u64().unwrap() > 0 {
                     conditions.push(Box::new(CreateCoinCondition::new(
-                        change_puzzlehash.unwrap(),
+                        change_puzzle_hash.clone(),
                         change.into(),
                         None,
                     )));
                     created_coins.push(Coin {
                         parent_coin_info: coin.name(),
-                        puzzle_hash: change_puzzlehash.unwrap().to_bytes32(),
+                        puzzle_hash: change_puzzle_hash.clone().to_bytes32(),
                         amount: change.to_u64().unwrap(),
                     });
                 }
 
-                if fee.to_u64().unwrap() > 0 {
-                    conditions.push(Box::new(ReserveFeeCondition::new(fee)));
+                if fee_amount > 0 {
+                    conditions.push(Box::new(ReserveFeeCondition::new(BigInt::from(fee_amount))));
                 }
                 for coin_announcement in coin_announcements_to_assert.clone() {
                     conditions.push(Box::new(coin_announcement));
@@ -152,7 +196,7 @@ impl BaseWallet {
                 }
 
                 let mut existing_coins_message = Vec::new();
-                for coin in coins {
+                for coin in coins.clone() {
                     existing_coins_message.extend_from_slice(coin.name().raw());
                 }
 
@@ -165,36 +209,41 @@ impl BaseWallet {
                     [&existing_coins_message[..], &created_coins_message[..]].concat(),
                 ));
 
-                conditions.push(Box::new(CreateCoinAnnouncementCondition {
-                    announcement_hash: message,
-                }));
+                conditions.push(Box::new(CreateCoinAnnouncementCondition::new(
+                    message.clone(),
+                )));
 
-                primary_assert_coin_announcement = Some(AssertCoinAnnouncementCondition::new(
-                    Bytes::from(coin.name()),
-                    message,
+                primary_assert_coin_announcement = Some(Box::new(
+                    AssertCoinAnnouncementCondition::new(Bytes::from(coin.name()), message.clone()),
                 ));
 
-                solution = make_solution_from_conditions(conditions, transform_standard_solution);
+                solution = WalletDecoration::make_solution_from_conditions(&self, conditions);
             } else {
-                solution = make_solution_from_conditions(
-                    vec![primary_assert_coin_announcement.unwrap()],
-                    transform_standard_solution,
+                solution = WalletDecoration::make_solution_from_conditions(
+                    &self,
+                    vec![primary_assert_coin_announcement.clone().unwrap().clone()],
+                    // transform_standard_solution,
                 );
             }
 
-            let puzzle = make_puzzle_reveal_from_puzzlehash(coin.puzzlehash);
+            let puzzle = make_puzzle_reveal_from_puzzlehash(Puzzlehash::from(coin.puzzle_hash));
+
             let coin_spend = CoinSpend {
                 coin,
-                puzzle_reveal: puzzle,
-                solution,
+                puzzle_reveal: puzzle.to_chia_program(),
+                solution: solution.to_chia_program(),
             };
-            spends.push(coin_spend);
+            spends.push(coin_spend.clone());
 
-            let signature = make_signature_for_coin_spend(coin_spend);
+            let signature = WalletDecoration::make_signature_for_coin_spend(
+                &self,
+                coin_spend.clone(),
+                keychain.clone(),
+            );
             signatures.push(signature);
         }
 
-        let aggregate = AugSchemeMPL::aggregate(&signatures);
+        let aggregate = AugSchemeMPL::aggregate(signatures);
 
         SpendBundle {
             coin_spends: spends,

@@ -82,3 +82,11 @@ impl UnhardenedWalletVector {
         WalletPuzzlehash::from_puzzlehash(&vector.puzzlehash, vector.derivation_index)
     }
 }
+
+impl Clone for UnhardenedWalletVector {
+    fn clone(&self) -> Self {
+        UnhardenedWalletVector {
+            wallet_vector: self.wallet_vector.clone(),
+        }
+    }
+}

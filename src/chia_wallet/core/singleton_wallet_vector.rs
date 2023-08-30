@@ -50,3 +50,13 @@ impl SingletonWalletVector {
         self.pooling_authentication_private_key.public_key()
     }
 }
+
+impl Clone for SingletonWalletVector {
+    fn clone(&self) -> Self {
+        SingletonWalletVector {
+            singleton_owner_private_key: self.singleton_owner_private_key.clone(),
+            pooling_authentication_private_key: self.pooling_authentication_private_key.clone(),
+            derivation_index: self.derivation_index,
+        }
+    }
+}

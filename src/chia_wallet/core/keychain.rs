@@ -1,7 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::chia_wallet::core::bytes::Puzzlehash;
-use chia_bls::public_key::PublicKey;
 use clvm_tools_rs::classic::clvm::__type_compatibility__::{Bytes, BytesFromType};
 use linked_hash_map::LinkedHashMap;
 
@@ -26,11 +25,12 @@ impl WalletKeychain {
         singleton_wallet_vectors_map: HashMap<PublicKeyWrapper, SingletonWalletVector>,
     ) -> Self {
         WalletKeychain {
-            hardened_map,
-            unhardened_map,
-            singleton_wallet_vectors_map,
+            hardened_map: hardened_map,
+            unhardened_map: unhardened_map,
+            singleton_wallet_vectors_map: singleton_wallet_vectors_map,
         }
     }
+
     fn from_bytes(bytes: &Vec<u8>) -> Self {
         let mut iterator = bytes.iter();
         Self::from_stream(&mut iterator)
@@ -97,10 +97,10 @@ impl WalletKeychain {
         Bytes::new(Some(BytesFromType::Raw(bytes_list)))
     }
 
-    pub fn singleton_wallet_vectors_map(&self) -> Vec<&SingletonWalletVector> {
+    pub fn singleton_wallet_vectors_map(&self) -> Vec<SingletonWalletVector> {
         self.singleton_wallet_vectors_map
             .values()
-            .map(|x| x.clone())
+            .cloned()
             .collect()
     }
 
@@ -191,5 +191,34 @@ impl WalletKeychain {
             .collect();
 
         Ok(outer_puzzlehashes)
+    }
+}
+
+impl Clone for WalletKeychain {
+    fn clone(&self) -> Self {
+        let mut hardened_map = LinkedHashMap::new();
+        let mut unhardened_map = LinkedHashMap::new();
+        let mut singleton_wallet_vectors_map = HashMap::new();
+
+        for (puzzlehash, wallet_vector) in self.hardened_map.iter() {
+            hardened_map.insert(puzzlehash.clone(), wallet_vector.clone());
+        }
+
+        for (puzzlehash, unhardened_wallet_vector) in self.unhardened_map.iter() {
+            unhardened_map.insert(puzzlehash.clone(), unhardened_wallet_vector.clone());
+        }
+
+        for (public_key_wrapper, singleton_wallet_vector) in
+            self.singleton_wallet_vectors_map.iter()
+        {
+            singleton_wallet_vectors_map
+                .insert(public_key_wrapper.clone(), singleton_wallet_vector.clone());
+        }
+
+        WalletKeychain::new(
+            hardened_map.clone(),
+            unhardened_map.clone(),
+            singleton_wallet_vectors_map.clone(),
+        )
     }
 }

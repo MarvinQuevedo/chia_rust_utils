@@ -63,3 +63,13 @@ impl Payment {
         }
     }
 }
+
+impl Clone for Payment {
+    fn clone(&self) -> Self {
+        Payment {
+            amount: self.amount.clone(),
+            puzzle_hash: self.puzzle_hash.clone(),
+            memos: self.memos.clone(),
+        }
+    }
+}

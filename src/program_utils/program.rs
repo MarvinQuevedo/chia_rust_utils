@@ -6,6 +6,7 @@ use crate::program_utils::serialized_program::SerializedProgram;
 
 use crate::program_utils::serialize::node_from_bytes as deserialize2;
 use crate::program_utils::serialize::{node_from_bytes, node_to_bytes};
+use chia_protocol::program::Program as ChiaProgram;
 use clvm_tools_rs::classic::clvm::__type_compatibility__::{t, Bytes, BytesFromType, Stream};
 use clvm_tools_rs::classic::clvm::serialize::{sexp_from_stream, SimpleCreateCLVMObject};
 use clvm_tools_rs::classic::clvm_tools::binutils::disassemble;
@@ -96,6 +97,9 @@ pub struct UncurriedProgram {
     pub args: Vec<Program>,
 }
 impl Program {
+    pub fn to_chia_program(&self) -> ChiaProgram {
+        ChiaProgram::from_serialized_bytes(self.serialized.clone())
+    }
     pub fn from_source(source: &str) -> Program {
         let serialized_program = assemble(source);
         return serialized_program.to_program().unwrap();

@@ -1,6 +1,7 @@
 use crate::program_utils::program::Program;
 use crate::program_utils::serialize::node_from_bytes;
 use chia::gen::flags::MEMPOOL_MODE;
+use chia_protocol::Program as ChiaProgram;
 use chia_utils_streamable_macro::sized_bytes::hex_to_bytes;
 use clvmr::allocator::{Allocator, NodePtr};
 use clvmr::chia_dialect::ChiaDialect;
@@ -83,6 +84,11 @@ impl SerializedProgram {
 impl From<String> for SerializedProgram {
     fn from(hex: String) -> Self {
         SerializedProgram::from_hex(hex)
+    }
+}
+impl From<ChiaProgram> for SerializedProgram {
+    fn from(program: ChiaProgram) -> Self {
+        SerializedProgram::from_bytes(&program.serialized_to_bytes())
     }
 }
 

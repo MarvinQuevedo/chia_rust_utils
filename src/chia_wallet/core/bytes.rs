@@ -2,9 +2,22 @@ use std::hash::{Hash, Hasher};
 use std::io::Read;
 
 use crate::program_utils::program::Program;
-use chia_protocol::Bytes32;
+use chia_protocol::{Bytes32, Bytes96};
 use clvm_tools_rs::classic::clvm::__type_compatibility__::Bytes as CvlmBytes;
 use clvm_tools_rs::classic::clvm::__type_compatibility__::{sha256, BytesFromType};
+
+pub static ZEROS_96: &str =
+    "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+
+lazy_static::lazy_static! {
+
+    pub static ref ZEROS_BYTES96: Bytes96 = {
+            let zeros = Bytes96::from_hex(ZEROS_96.to_string())
+                .unwrap();
+            zeros.clone()
+    };
+
+}
 
 #[derive(Debug, Clone)]
 pub struct Bytes(pub CvlmBytes);

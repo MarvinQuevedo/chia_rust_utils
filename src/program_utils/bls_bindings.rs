@@ -1,7 +1,7 @@
 use blst::min_pk::{PublicKey, Signature};
 use blst::BLST_ERROR;
+use chia_bls::signature;
 use chia_protocol::{Bytes48, Bytes96};
-
 //const BASIC_SCHEME_DST: &[u8; 43] = b"BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_";
 const AUG_SCHEME_DST: &[u8; 43] = b"BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_AUG_";
 // const POP_SCHEME_DST: &[u8; 43] = b"BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_";
@@ -94,5 +94,20 @@ pub fn aggregate_verify_signature(
         BLST_ERROR::BLST_BAD_SCALAR => {
             return false;
         }
+    }
+}
+
+pub struct AugSchemeMPL {}
+impl AugSchemeMPL {
+    pub fn aggregate(sigs: Vec<chia_bls::Signature>) -> Bytes96 {
+        let mut sigs_converted: Vec<chia_bls::Signature> = Vec::new();
+        for sig in sigs {
+            let sig_bytes = sig.to_bytes();
+            let sig = signature::Signature::from_bytes(&sig_bytes).unwrap();
+            sigs_converted.push(sig);
+        }
+
+        let bytes = signature::aggregate(&sigs_converted).to_bytes();
+        Bytes96::from(bytes)
     }
 }
